@@ -1,0 +1,20 @@
+#! /bin/bash -e
+
+if [ "$#" -ne 1 ]; then
+    echo "Illegal number of parameters"
+    exit -1
+fi
+
+TOOL_NAME=$1
+
+PLATFORM=`uname`
+if [ "$PLATFORM" == 'Darwin' ]; then
+	CORE_COUNT=`sysctl hw.ncpu | awk '{print $2}'`
+	PLATFORM_SHORT_NAME='mac'
+	EXEC_DIR=${TOOL_NAME}/build/Release
+else
+	PLATFORM_SHORT_NAME='linux'
+	EXEC_DIR=../build/release
+fi
+SCRIPT_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
+EXEC=${SCRIPT_DIR}/../${EXEC_DIR}/${TOOL_NAME}

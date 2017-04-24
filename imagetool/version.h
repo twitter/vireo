@@ -1,0 +1,1 @@
+#define IMAGETOOL_VERSION "1.1"

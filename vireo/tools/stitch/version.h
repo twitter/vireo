@@ -1,0 +1,1 @@
+#define STITCH_VERSION "0.0.1"

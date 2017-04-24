@@ -1,0 +1,7 @@
+#! /bin/bash -e
+NEST=nest2
+SCRIPT_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
+SCRIPT=$1
+shift
+rsync -az --delete $SCRIPT_DIR $NEST:twitter-media/vireo/tools/
+ssh $NEST "source ~/.bash_profile ; scl enable devtoolset-2 'twitter-media/vireo/tools/batch/${SCRIPT} $@'"

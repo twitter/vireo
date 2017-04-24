@@ -1,0 +1,12 @@
+{
+   swscale rgb
+   Memcheck:Addr16
+   obj:*
+   fun:swscale
+   fun:sws_scale
+}
+{
+   rgb convert
+   Memcheck:Addr8
+   fun:rgb24tobgr32_mmxext
+}
