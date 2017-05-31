@@ -391,6 +391,11 @@ bool ImageWriterPNG::copyLossless(ImageReader* reader)
 		int32_t numEntries;
 		png_get_PLTE(readerPNG->m_PNGDecompress, readerPNG->m_PNGInfo, &palette, &numEntries);
 		png_set_PLTE(m_PNGCompress, m_PNGInfo, palette, numEntries);
+		png_bytep atRNS = NULL;
+		png_color_16p ctRNS = NULL;
+		int numtRNS = 0;
+		png_get_tRNS(readerPNG->m_PNGDecompress, readerPNG->m_PNGInfo, &atRNS, &numtRNS, &ctRNS);
+		png_set_tRNS(m_PNGCompress, m_PNGInfo, atRNS, numtRNS, ctRNS);
 		filterType = 0;
 	}
 

@@ -12,6 +12,8 @@
 
 #define MP2TS_SYNC_BYTE 0x47
 #define MP2TS_PACKET_LENGTH 188
+// Max allowed difference between predicted and actual pts, measured on 90 kHz clock.
+#define MP2TS_PTS_ALLOWED_DRIFT 10
 
 #include <vector>
 static const std::vector<uint32_t> kSampleRate = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
@@ -19,3 +21,5 @@ static const std::vector<uint32_t> kSampleRate = { 96000, 88200, 64000, 48000, 4
 const static uint64_t kMilliSecondScale = 1000;
 const static uint64_t kMicroSecondScale = 1000000;
 const static uint64_t kNanoSecondScale = 1000000000;
+
+const static uint32_t kMP2TSTimescale = 90000;  // default timescale for MPEG-TS

@@ -1,4 +1,4 @@
-AC_INIT([imagecore], [1.0], [lalonso@twitter.com])
+AC_INIT([imagecore], [1.0], [media-platform@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_PROG_CC
 AC_PROG_CXX

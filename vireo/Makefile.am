@@ -2,7 +2,11 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ../imagecore
 
 libvireo_la_CPPFLAGS = -I./ -I../ -I../thirdparty/l-smash_extra
-bin_PROGRAMS = remux stitch thumbnails transcode trim unchunk validate viddiff
+bin_PROGRAMS = frames remux stitch thumbnails transcode trim unchunk validate viddiff
+
+frames_CPPFLAGS = -I../
+frames_SOURCES = tools/remux/main.cpp  tests/test_common.cpp
+frames_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 
 remux_CPPFLAGS = -I../
 remux_SOURCES = tools/remux/main.cpp  tests/test_common.cpp

@@ -55,6 +55,7 @@ struct ADTSHeader {
   uint8_t channels;
   uint32_t header_size;  // size of the header
   uint32_t data_size;  // size of the audio sample
+  bool valid;  // false, if we aren't able to extract complete ADTS from PES
 };
 
 struct _MP2TS {
@@ -88,12 +89,42 @@ struct _MP2TS {
     };
   } tracks;
 
+  struct PacketCache {
+    common::Data32 packet_data = common::Data32(new uint8_t[kSize_Buffer], kSize_Buffer, [](uint8_t*p){ delete[] p; });
+    int64_t packet_pts = AV_NOPTS_VALUE;
+    int64_t packet_dts = AV_NOPTS_VALUE;
+
+    void clear() {
+      packet_data.set_bounds(0, 0);
+      packet_pts = AV_NOPTS_VALUE;
+      packet_dts = AV_NOPTS_VALUE;
+    }
+
+    bool empty() {
+      return packet_data.count() == 0;
+    }
+
+    void cache_new_packet(int64_t pts, int64_t dts, const common::Data32& new_data) {
+      clear();
+      packet_data.copy(new_data);
+      packet_pts = pts;
+      packet_dts = dts;
+    }
+
+    void pad_data_to_cached_packet(const common::Data32& new_data) {
+      packet_data.set_bounds(packet_data.b(), packet_data.b());
+      packet_data.copy(new_data);
+      packet_data.set_bounds(0, packet_data.b());
+    }
+  };
+
   struct {
     uint16_t width = 0;
     uint16_t height = 0;
     settings::Video::Codec codec = settings::Video::Codec::Unknown;
     unique_ptr<common::Data16> sps = nullptr;
     unique_ptr<common::Data16> pps = nullptr;
+    PacketCache cache;
   } video;
 
   struct {
@@ -102,6 +133,7 @@ struct _MP2TS {
     uint8_t channels = 0;
     bool multiple_samples_per_packet = false;
     vector<uint32_t> samples_per_packet;
+    PacketCache cache;
   } audio;
 
   struct {
@@ -114,12 +146,17 @@ struct _MP2TS {
 
   _MP2TS(common::Reader&& reader) : reader(move(reader)) {}
 
-  static ADTSHeader ParseADTSHeader(common::Data32& packet_data) {
+  static ADTSHeader ParseADTSHeader(const common::Data32& packet_data) {
+    // Returns true if the entire ADTS packet is inside packet_data. Otherwise,
+    // some part of the ADTS is in the next PES packet.
     // http://wiki.multimedia.cx/index.php?title=ADTS
     ADTSHeader header;
+    header.valid = false;
     const uint8_t* bytes = packet_data.data() + packet_data.a();
     uint32_t offset = 0;
-    THROW_IF(packet_data.count() < 7, Invalid);
+    if (packet_data.count() < 7) {
+      return header;
+    }
     THROW_IF(bytes[offset] != 0xFF, Invalid);  // syncword 0xFFF
     offset++;
     THROW_IF((bytes[offset] & 0xF0) != 0xF0, Invalid);
@@ -147,7 +184,9 @@ struct _MP2TS {
     header.channels = channel_configuration;
     offset++;
     const uint32_t frame_length = ((uint32_t)(bytes[offset] & 0b00000011) << 11) + ((uint32_t)bytes[offset + 1] << 3) + ((bytes[offset + 2] & 0b11100000) >> 5);
-    THROW_IF(frame_length > packet_data.count(), Invalid);
+    if (frame_length > packet_data.count()) {
+      return header;
+    }
     offset += 3;
     const uint8_t num_aac_frames = (bytes[offset] & 0b00000011) + 1;
     THROW_IF(num_aac_frames != 1, Unsupported);  // we expect 1 AAC frame per ADTS frame
@@ -158,41 +197,90 @@ struct _MP2TS {
     THROW_IF(frame_length <= offset, Invalid);
     header.header_size = offset;
     header.data_size = frame_length - header.header_size;
+    header.valid = true;
     return header;
   }
 
-  void process_h264_packet(AVPacket& packet) {
-    // H.264 nal unit in Annex-B format
-    int64_t pts = packet.pts;
-    int64_t dts = packet.dts;
-    bool keyframe = false;
-    common::Data32 packet_data = common::Data32(packet.data, packet.size, nullptr);
-
-    auto starts_with_start_prefix_code = [](const common::Data32& packet_data) {
-      return ((packet_data(0) == 0x00 && packet_data(1) == 0x00 && packet_data(2) == 0x01) ||
-              (packet_data(0) == 0x00 && packet_data(1) == 0x00 && packet_data(2) == 0x00 && packet_data(3) == 0x01));
-    };
-
-    if (pts != AV_NOPTS_VALUE && dts != AV_NOPTS_VALUE && starts_with_start_prefix_code(packet_data)) {
-      ByteRange pre_caption_range;
-
-      // New sample
-      ANNEXB<H264NalType> annexb_parser(packet_data);
-      uint32_t index = 0;
-
-      // Skip Access Unit Delimiter (if any)
-      NalInfo<H264NalType> info = annexb_parser(index);
-      if (info.type == H264NalType::AUD) {
-        pre_caption_range.available = true;
-        pre_caption_range.size += info.size + info.start_code_prefix_size;
-        info = annexb_parser(++index);
+  int32_t aud_offset(const common::Data32& packet) {
+    common::Data32 _packet = common::Data32(packet.data() + packet.a(), packet.count(), nullptr);
+    while (_packet.count()) {
+      uint32_t start_code_prefix_size = ANNEXB<H264NalType>::StartCodePrefixSize(_packet);
+      if (start_code_prefix_size) {
+        _packet.set_bounds(_packet.a() + start_code_prefix_size, _packet.b());
+        H264NalType type = ANNEXB<H264NalType>::GetNalType(_packet);
+        if (type == H264NalType::AUD) {
+          return packet.a() + _packet.a() - start_code_prefix_size;
+        }
       }
+      _packet.set_bounds(_packet.a() + 1, _packet.b());
+    }
+    return -1;
+  }
+
+  void process_h264_packet(const AVPacket& packet) {
+    // H.264 nal unit in Annex-B format
+    auto pts = packet.pts;
+    auto dts = packet.dts;
+    auto packet_data = common::Data32(packet.data, packet.size, nullptr);
+    int32_t offset = aud_offset(packet_data);
+    if (offset == 0) {
+      // Packet starts with new frame data
+      CHECK(video.cache.packet_data.count() == 0);
+      THROW_IF(pts == AV_NOPTS_VALUE || dts == AV_NOPTS_VALUE, Invalid, "PES packet doesn't contain a valid timestamp");
+      process_h264_frame(pts, dts, packet_data);
+    } else {
+      // There is data that belongs to previous frame
+      CHECK(tracks(SampleType::Video).samples.size());
+      auto& sample = tracks(SampleType::Video).samples.back();
+      if (offset < 0) {
+        // All data belongs to the previous sample
+        if (pts != AV_NOPTS_VALUE && dts != AV_NOPTS_VALUE) {
+          THROW_IF(pts != sample.pts || dts != sample.dts, Invalid, "PES packet contains an invalid timestamp");
+        } else {
+          THROW_IF(pts != AV_NOPTS_VALUE || dts != AV_NOPTS_VALUE, Invalid, "PES packet contains an invalid timestamp");
+        }
+        pad_data_to_previous_h264_frame(packet_data);
+      } else {
+        // There is new frame data as well as data that belongs to previous sample
+        THROW_IF(pts == AV_NOPTS_VALUE || dts == AV_NOPTS_VALUE, Invalid, "PES packet doesn't contain a valid timestamp");
+        common::Data32 head_packet_data = common::Data32(packet_data.data() + packet_data.a(), offset, nullptr);
+        if (video.cache.packet_data.count() == 0) {
+          // All data from previous packet is already processed
+          THROW_IF(pts == sample.pts || dts == sample.dts, Invalid, "PES packet contains an invalid timestamp");
+          pad_data_to_previous_h264_frame(head_packet_data);
+        } else {
+          // There is cached data that needs to be processed before processing new frame data
+          THROW_IF(pts == video.cache.packet_pts || dts == video.cache.packet_dts, Invalid, "PES packet contains an invalid timestamp");
+          video.cache.pad_data_to_cached_packet(head_packet_data);
+          process_h264_frame(video.cache.packet_pts, video.cache.packet_dts, video.cache.packet_data);
+        }
+        common::Data32 tail_packet_data = common::Data32(packet_data.data() + packet_data.a() + offset, packet_data.count() - offset, nullptr);
+        process_h264_frame(pts, dts, tail_packet_data);
+      }
+    }
+  }
+
+  void pad_data_to_previous_h264_frame(const common::Data32& packet_data) {
+    CHECK(tracks(SampleType::Video).samples.size());
+    auto& sample = tracks(SampleType::Video).samples.back();
+    sample.contents.push_back(packet_data);
+    video.cache.clear();
+  }
+
+  void process_h264_frame(int64_t pts, int64_t dts, const common::Data32& packet_data) {
+    // H.264 nal unit in Annex-B format
+    bool keyframe = false;
+    CHECK(ANNEXB<H264NalType>::StartCodePrefixSize(packet_data));
+    ANNEXB<H264NalType> annexb_parser(packet_data);
+
+    vector<common::Data32> caption_contents;
+    bool frame_data_found = false;
+    for (uint32_t index = 0; index < annexb_parser.b(); index++) {
+      NalInfo<H264NalType> info = annexb_parser(index);
 
       // Check if there is an SPS + PPS
       if (info.type == H264NalType::SPS) {
         // Found an SPS
-        pre_caption_range.available = true;
-        pre_caption_range.size += info.size + info.start_code_prefix_size;
         common::Data16 packet_sps = common::Data16(packet_data.data() + info.byte_offset, info.size, nullptr);
 
         // Parse width/height from SPS
@@ -208,11 +296,15 @@ struct _MP2TS {
         }
 
         // After SPS, expect a PPS
-        info = annexb_parser(++index);
-        THROW_IF(info.type != H264NalType::PPS, Invalid);
-        pre_caption_range.size += info.size + info.start_code_prefix_size;
-        common::Data16 packet_pps = common::Data16(packet_data.data() + info.byte_offset, info.size, nullptr);
         index++;
+        if (index >= annexb_parser.count()) {
+          CHECK(ANNEXB<H264NalType>::StartCodePrefixSize(packet_data));
+          video.cache.cache_new_packet(pts, dts, packet_data);
+          return;
+        }
+        info = annexb_parser(index);
+        THROW_IF(info.type != H264NalType::PPS, Invalid);
+        common::Data16 packet_pps = common::Data16(packet_data.data() + info.byte_offset, info.size, nullptr);
 
         // Save SPS/PPS from first packet and ensure all other SPS/PPS match
         if (tracks(SampleType::Video).initialized) {
@@ -232,75 +324,105 @@ struct _MP2TS {
         }
       }
 
-      vector<common::Data32> caption_contents;
-      bool frame_data_found = false;
-      for (; index < annexb_parser.b(); index++) {
-        info = annexb_parser(index);
-        THROW_IF(info.type == H264NalType::Unknown, Unsupported);
-
-        if (info.type == decode::H264NalType::SEI) {
-          common::Data32 data = common::Data32(packet_data.data() + info.byte_offset, info.size, nullptr);
-          common::Data32 caption_data = common::Data32(new uint8_t[info.size + info.start_code_prefix_size], info.size + info.start_code_prefix_size, [](uint8_t* p) { delete[] p; });
-          vector<ByteRange> caption_ranges = util::get_caption_ranges(data);
-          if (!caption_ranges.empty()) {
-            // copy start code
-            uint32_t caption_size = util::copy_caption_payloads_to_caption_data(data, caption_data, caption_ranges, info.start_code_prefix_size);
-            common::Data32 start_code = common::Data32(packet_data.data() + info.byte_offset - info.start_code_prefix_size, info.start_code_prefix_size, nullptr);
-            caption_data.set_bounds(0, info.start_code_prefix_size);
-            caption_data.copy(start_code);
-            caption_data.set_bounds(0, caption_size);
-            caption_contents.push_back(caption_data);
-          }
-        }
-
-        // Find the first frame data, check if it is a keyframe
-        // Save the packet contents starting from the first frame data
-        if (!frame_data_found && (info.type == decode::H264NalType::IDR || info.type == decode::H264NalType::FRM)) {
-          frame_data_found = true;
-          keyframe = (info.type == H264NalType::IDR) ? true : false;
-          vector<common::Data32> contents;
-          const uint32_t byte_offset = info.byte_offset - info.start_code_prefix_size;
-          THROW_IF(byte_offset < 0, Invalid);
-          common::Data32 packet_video = common::Data32(packet_data.data() + byte_offset, packet_data.b() - byte_offset, nullptr);
-          common::Data32 video_data = common::Data32(new uint8_t[packet_video.count()], packet_video.count(), [](uint8_t* p){ delete[] p; });
-          video_data.copy(packet_video);
-          CHECK(video_data.count());
-          contents.push_back(video_data);
-          if (tracks(SampleType::Video).samples.size()) {
-            int64_t prev_dts = tracks(SampleType::Video).samples.back().dts;
-            THROW_IF(dts < prev_dts, Invalid);
-            tracks(SampleType::Video).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
-          }
-          tracks(SampleType::Video).samples.push_back({ contents, (uint32_t)pts, (uint32_t)dts, keyframe });
-          THROW_IF(tracks(SampleType::Video).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
+      if (info.type == decode::H264NalType::SEI) {
+        common::Data32 data = common::Data32(packet_data.data() + info.byte_offset, info.size, nullptr);
+        common::Data32 caption_data = common::Data32(new uint8_t[info.size + info.start_code_prefix_size], info.size + info.start_code_prefix_size, [](uint8_t* p) { delete[] p; });
+        vector<ByteRange> caption_ranges = util::get_caption_ranges(data);
+        if (!caption_ranges.empty()) {
+          // copy start code
+          uint32_t caption_size = util::copy_caption_payloads_to_caption_data(data, caption_data, caption_ranges, info.start_code_prefix_size);
+          common::Data32 start_code = common::Data32(packet_data.data() + info.byte_offset - info.start_code_prefix_size, info.start_code_prefix_size, nullptr);
+          caption_data.set_bounds(0, info.start_code_prefix_size);
+          caption_data.copy(start_code);
+          caption_data.set_bounds(0, caption_size);
+          caption_contents.push_back(caption_data);
         }
       }
 
-      if (!caption_contents.empty()) {
-        tracks(SampleType::Caption).initialized = true;
-        caption.codec = settings::Caption::Codec::Unknown;
-        tracks(SampleType::Caption).timescale = tracks(SampleType::Video).timescale;
+      // Find the first frame data, check if it is a keyframe
+      // Save the packet contents starting from the first frame data
+      if (!frame_data_found && (info.type == decode::H264NalType::IDR || info.type == decode::H264NalType::FRM)) {
+        frame_data_found = true;
+        keyframe = (info.type == H264NalType::IDR) ? true : false;
+        vector<common::Data32> contents;
+        const uint32_t byte_offset = info.byte_offset - info.start_code_prefix_size;
+        THROW_IF(byte_offset < 0, Invalid);
+        common::Data32 packet_video = common::Data32(packet_data.data() + byte_offset, packet_data.b() - byte_offset, nullptr);
+        CHECK(packet_video.count());
+        contents.push_back(packet_video);
+        if (tracks(SampleType::Video).samples.size()) {
+          int64_t prev_dts = tracks(SampleType::Video).samples.back().dts;
+          THROW_IF(dts < prev_dts, Invalid);
+          tracks(SampleType::Video).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
+        }
+        tracks(SampleType::Video).samples.push_back({ contents, (uint32_t)pts, (uint32_t)dts, keyframe });
+        THROW_IF(tracks(SampleType::Video).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
       }
-
-      if (tracks(SampleType::Video).dts_offsets_per_packet.size()) {
-        tracks(SampleType::Caption).dts_offsets_per_packet.push_back(tracks(SampleType::Video).dts_offsets_per_packet.back());
-      }
-      tracks(SampleType::Caption).samples.push_back({ caption_contents, (uint32_t)pts, (uint32_t)dts, true });
-      THROW_IF(tracks(SampleType::Caption).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
-    } else {
-      // Data belongs to the previous sample
-      CHECK(tracks(SampleType::Video).samples.size());
-      auto& sample = tracks(SampleType::Video).samples.back();
-      if (pts != AV_NOPTS_VALUE && dts != AV_NOPTS_VALUE) {
-        THROW_IF(pts != sample.pts || dts != sample.dts, Invalid);
-      } else {
-        THROW_IF(pts != AV_NOPTS_VALUE || dts != AV_NOPTS_VALUE, Invalid);
-      }
-      THROW_IF(starts_with_start_prefix_code(packet_data), Invalid);
-      common::Data32 video_data = common::Data32(new uint8_t[packet_data.count()], packet_data.count(), [](uint8_t* p){ delete[] p; });
-      video_data.copy(packet_data);
-      sample.contents.push_back(video_data);
     }
+
+    if (!frame_data_found) {
+      CHECK(ANNEXB<H264NalType>::StartCodePrefixSize(packet_data));
+      video.cache.cache_new_packet(pts, dts, packet_data);
+      return;
+    }
+
+    if (!caption_contents.empty()) {
+      tracks(SampleType::Caption).initialized = true;
+      caption.codec = settings::Caption::Codec::Unknown;
+      tracks(SampleType::Caption).timescale = tracks(SampleType::Video).timescale;
+    }
+
+    if (tracks(SampleType::Video).dts_offsets_per_packet.size()) {
+      tracks(SampleType::Caption).dts_offsets_per_packet.push_back(tracks(SampleType::Video).dts_offsets_per_packet.back());
+    }
+    tracks(SampleType::Caption).samples.push_back({ caption_contents, (uint32_t)pts, (uint32_t)dts, true });
+    THROW_IF(tracks(SampleType::Caption).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
+
+    video.cache.clear();
+  }
+
+  uint32_t process_adts_packet(int64_t pts, int64_t dts, common::Data32& packet_data) {
+    // Processes a single ADTS packet from packet_data, if possible.
+    // Returns the number of bytes processed from packet_data,
+    // and adjusts packet_data's boundaries with the data processed.
+    ADTSHeader header = ParseADTSHeader(packet_data);
+    if (!header.valid) {
+      return 0;
+    }
+
+    // Save AAC settings from first packet and ensure all packets match
+    if (tracks(SampleType::Audio).initialized) {
+      THROW_IF(header.codec != audio.codec, Invalid);
+      THROW_IF(header.sample_rate != audio.sample_rate, Invalid);
+      THROW_IF(header.channels != audio.channels, Invalid);
+    } else {
+      audio.codec = header.codec;
+      audio.sample_rate = header.sample_rate;
+      audio.channels = header.channels;
+      tracks(SampleType::Audio).initialized = true;
+    }
+
+    // Save the packet contents
+    vector<common::Data32> contents;
+    uint32_t packet_b = packet_data.b();
+    packet_data.set_bounds(packet_data.a() + header.header_size, packet_data.a() + header.header_size + header.data_size);
+    // copy-construct a copy of packet_data inside contents
+    contents.emplace_back(packet_data);
+    // packet_data.a() is already shifted by header.header_size
+    packet_data.set_bounds(packet_data.a() + header.data_size, packet_b);
+
+    // Save the dts offset between packets (starting from 2nd packet) for duration calculation and PTS/DTS adjustment
+    if (tracks(SampleType::Audio).samples.size()) {
+      int64_t prev_dts = tracks(SampleType::Audio).samples.back().dts;
+      if (dts > prev_dts) {
+        tracks(SampleType::Audio).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
+      }
+    }
+
+    // Save the sample
+    tracks(SampleType::Audio).samples.push_back({ contents, (uint32_t)pts, (uint32_t)dts, true });
+    THROW_IF(tracks(SampleType::Audio).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
+    return header.header_size + header.data_size;
   }
 
   void process_aac_packet(AVPacket& packet) {
@@ -309,49 +431,37 @@ struct _MP2TS {
     int64_t dts = packet.dts;
     common::Data32 packet_data = common::Data32(packet.data, packet.size, nullptr);
 
-    // Packet may contain mulitple ADTS frames
+    if (!audio.cache.empty()) {
+      // Some of the beginning of this packet belongs to previous ADTS frame.
+      // Audio PES packets are usually small, especially when using this
+      // optimisation - no problem to copy.
+      uint32_t cached_bytes = audio.cache.packet_data.count();
+      audio.cache.pad_data_to_cached_packet(packet_data);
+      uint32_t processed_bytes = process_adts_packet(audio.cache.packet_pts, audio.cache.packet_dts, audio.cache.packet_data);
+      THROW_IF(processed_bytes == 0, Unsupported, "Unable to finish cached audio packet on next PES");
+      packet_data.set_bounds(packet_data.a() + processed_bytes - cached_bytes,
+                             packet_data.b());
+      audio.cache.clear();
+    }
+
+    // Packet may contain multiple ADTS frames
     uint32_t num_samples = 0;
     while (packet_data.count()) {
-      ADTSHeader header = ParseADTSHeader(packet_data);
-
-      // Save AAC settings from first packet and ensure all packets match
-      if (tracks(SampleType::Audio).initialized) {
-        THROW_IF(header.codec != audio.codec, Invalid);
-        THROW_IF(header.sample_rate != audio.sample_rate, Invalid);
-        THROW_IF(header.channels != audio.channels, Invalid);
-      } else {
-        audio.codec = header.codec;
-        audio.sample_rate = header.sample_rate;
-        audio.channels = header.channels;
-        tracks(SampleType::Audio).initialized = true;
-      }
-
-      // Save the packet contents
-      vector<common::Data32> contents;
-      uint32_t b = packet_data.b();
-      packet_data.set_bounds(packet_data.a() + header.header_size, packet_data.a() + header.header_size + header.data_size);
-      common::Data32 audio_data = common::Data32(new uint8_t[header.data_size], header.data_size, [](uint8_t* p){ delete[] p; });
-      audio_data.copy(packet_data);
-      packet_data.set_bounds(packet_data.a() + header.data_size, b);
-      contents.push_back(audio_data);
-
-      // Save the dts offset between packets (starting from 2nd packet) for duration calculation and PTS/DTS adjustment
-      if (num_samples == 0 && tracks(SampleType::Audio).samples.size()) {
-        int64_t prev_dts = tracks(SampleType::Audio).samples.back().dts;
-        THROW_IF(dts < prev_dts, Invalid);
-        tracks(SampleType::Audio).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
-      }
-
-      // Save the sample
-      tracks(SampleType::Audio).samples.push_back({ contents, (uint32_t)pts, (uint32_t)dts, true });
-      THROW_IF(tracks(SampleType::Audio).samples.size() >= kMaxMP2TSSampleCount, Unsafe);
+      uint32_t processed_bytes = process_adts_packet(pts, dts, packet_data);
       num_samples++;
+      if (processed_bytes == 0) {
+        // Reached the end. Cache.
+        audio.cache.cache_new_packet(pts, dts, packet_data);
+        break;
+      }
     }
-    CHECK(num_samples);
-    if (num_samples != 1) {
+    // num_samples can be 0 if we only continue the previous ADTS in this PES
+    if (num_samples > 1) {
       audio.multiple_samples_per_packet = true;
     }
-    audio.samples_per_packet.push_back(num_samples);
+    if (num_samples > 0) {
+      audio.samples_per_packet.push_back(num_samples);
+    }
   }
 
   void process_timed_id3_packet(AVPacket& packet) {
@@ -417,6 +527,8 @@ struct _MP2TS {
     }
 
     // Parse packets
+    audio.cache.clear();
+    video.cache.clear();
     AVPacket packet;
     while (av_read_frame(format_context.get(), &packet) >= 0) {
       SampleType type = SampleType::Unknown;
@@ -460,34 +572,37 @@ struct _MP2TS {
             dts_offsets_per_sample.push_back(dts_offset_per_sample);
           }
         }
-        uint32_t samples_in_last_packet = (type == SampleType::Audio) ? audio.samples_per_packet.back() : 1;
-        uint32_t last_dts_offset = common::median(dts_offsets_per_sample) * samples_in_last_packet;
+        uint32_t last_dts_offset;
+        if (type == SampleType::Audio) {
+          last_dts_offset = common::round_divide<uint64_t>((uint64_t) kMP2TSTimescale * AUDIO_FRAME_SIZE, audio.samples_per_packet.back(), audio.sample_rate);
+        } else {
+          last_dts_offset = common::median(dts_offsets_per_sample);
+        }
         tracks(type).duration += last_dts_offset;
-        tracks(type).dts_offsets_per_packet.push_back(last_dts_offset);  // This is required for audio sample PTS adjustment
       }
     }
 
     // In case there were multiple audio samples per packet, PTS/DTS values have to be adjusted
     if (audio.multiple_samples_per_packet) {
-      CHECK(audio.samples_per_packet.size() == tracks(SampleType::Audio).dts_offsets_per_packet.size());
-      uint32_t index = 0;
-      uint32_t num_samples = 0;
-      uint32_t dts_offset_per_sample = 0;
-      uint32_t prev_pts = 0;
-      uint32_t prev_dts = 0;
+      int32_t index = -1;
+      uint64_t num_samples = 0;
+      uint64_t current_sample = 0;
+      uint32_t start_pts = 0;
+      uint32_t start_dts = 0;
       for (auto& sample: tracks(SampleType::Audio).samples) {
-        if (num_samples == 0) {
-          num_samples = audio.samples_per_packet[index];
-          dts_offset_per_sample = common::round_divide(tracks(SampleType::Audio).dts_offsets_per_packet[index], (uint32_t)1, num_samples);
-          CHECK(dts_offset_per_sample);
+        if (current_sample == num_samples) {
           index++;
+          num_samples = audio.samples_per_packet[index];
+          current_sample = 0;
+          start_pts = sample.pts;
+          start_dts = sample.dts;
         } else {
-          sample.pts = prev_pts + dts_offset_per_sample;
-          sample.dts = prev_dts + dts_offset_per_sample;
+          int64_t dts_offset_this_sample = (int64_t) kMP2TSTimescale * current_sample * AUDIO_FRAME_SIZE / audio.sample_rate;
+          CHECK(dts_offset_this_sample);
+          sample.pts = start_pts + dts_offset_this_sample;
+          sample.dts = start_dts + dts_offset_this_sample;
         }
-        prev_pts = sample.pts;
-        prev_dts = sample.dts;
-        num_samples--;
+        current_sample++;
       }
     }
 

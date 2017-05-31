@@ -18,27 +18,30 @@ struct AnnexB {
 };
 
 template <>
+auto ANNEXB<H264NalType>::GetNalType(const common::Data32 &data) -> H264NalType {
+  if (data.count()) {
+    uint8_t type = (data(data.a()) & 0x1F);
+    for (auto nal_type: enumeration::Enum<H264NalType>(H264NalType::FRM, H264NalType::FLLR)) {
+      if (nal_type == type) {
+        return nal_type;
+      }
+    }
+  }
+  return H264NalType::Unknown;
+}
+
+template <>
 struct _ANNEXB<H264NalType> {
   common::Data32 data;
   vector<NalInfo<H264NalType>> nal_infos;
   _ANNEXB(const common::Data32& data) : data(move(common::Data32(data.data() + data.a(), data.count(), nullptr))) {}
   bool initialized = false;
 
-  static auto StartCodePrefixSize(common::Data32& data) -> uint8_t {
-    if (data.count() >= 4 && data(data.a()) == 0x00 && data(data.a() + 1) == 0x00 && data(data.a() + 2) == 0x00 && data(data.a() + 3) == 0x01) {  // 4-byte start code prefix
-      return 4;
-    } else if (data.count() >= 3 && data(data.a()) == 0x00 && data(data.a() + 1) == 0x00 && data(data.a() + 2) == 0x01) {  // 3-byte start code prefix
-      return 3;
-    } else {
-      return 0;
-    }
-  };
-
-  static auto NalSize(common::Data32& data) -> uint32_t {
+  static auto NalSize(const common::Data32& data) -> uint32_t {
     common::Data32 _data = common::Data32(data.data() + data.a(), data.count(), nullptr);
     uint32_t size = 0;
     while (_data.count()) {
-      if (StartCodePrefixSize(_data)) {
+      if (ANNEXB<H264NalType>::StartCodePrefixSize(_data)) {
         break;
       } else {
         ++size;
@@ -48,14 +51,13 @@ struct _ANNEXB<H264NalType> {
     return size;
   };
 
-  static auto NextAnnexB(common::Data32& data) -> AnnexB {
+  static auto NextAnnexB(const common::Data32& data) -> AnnexB {
     common::Data32 _data = common::Data32(data.data() + data.a(), data.count(), nullptr);
     AnnexB annexb;
-    annexb.start_code_prefix_size = StartCodePrefixSize(_data);
+    annexb.start_code_prefix_size = ANNEXB<H264NalType>::StartCodePrefixSize(_data);
     CHECK(annexb.start_code_prefix_size != 0);
     _data.set_bounds(_data.a() + annexb.start_code_prefix_size, _data.b());
     annexb.nal_size = NalSize(_data);
-    THROW_IF(annexb.nal_size == 0, Invalid);
     return annexb;
   }
 
@@ -64,14 +66,7 @@ struct _ANNEXB<H264NalType> {
     NalInfo<H264NalType> info;
     AnnexB annexb = NextAnnexB(data);
     data.set_bounds(data.a() + annexb.start_code_prefix_size, data.b());
-    uint8_t type = (data(data.a()) & 0x1F);
-    info.type = H264NalType::Unknown;
-    for (auto nal_type: enumeration::Enum<H264NalType>(H264NalType::FRM, H264NalType::FLLR)) {
-      if (nal_type == type) {
-        info.type = nal_type;
-        break;
-      }
-    }
+    info.type = ANNEXB<H264NalType>::GetNalType(data);
     THROW_IF(info.type == H264NalType::EOFL, Unsupported);  // not tested
     info.byte_offset = data.a();
     info.size = annexb.nal_size;
@@ -123,7 +118,7 @@ auto annexb_to_avcc(common::Data32& data, uint8_t nalu_length_size) -> void {
   if (out_size == data.count()) {  // inline conversion possible
     for (const auto& nal_info: annexb_parser) {
       _data.set_bounds(nal_info.byte_offset - nalu_length_size, _data.b());
-      auto start_code_prefix_size = _ANNEXB<H264NalType>::StartCodePrefixSize(_data);
+      auto start_code_prefix_size = ANNEXB<H264NalType>::StartCodePrefixSize(_data);
       THROW_IF(start_code_prefix_size != nalu_length_size, Invalid);
       write_nal_size(_data, nal_info.size, nalu_length_size);
     }

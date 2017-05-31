@@ -45,9 +45,8 @@ void order_samples(const uint32_t audio_timescale, const functional::Audio<Sampl
 
     while (audio_sample_index < audio.count()) {
       if (a_sample_cache.empty()) {
-        auto a_sample = audio(audio_sample_index);
-        CHECK(a_sample.type == SampleType::Audio);
-        a_sample_cache.push_back(a_sample);
+        a_sample_cache.push_back(audio(audio_sample_index));
+        CHECK(a_sample_cache.back().type == SampleType::Audio);
       }
       const auto a_dts = (float)a_sample_cache.front().dts / audio_timescale;
       if (a_dts < v_dts) {

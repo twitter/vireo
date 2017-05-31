@@ -1,4 +1,4 @@
-AC_INIT([vireo], [1.0], [kquennesson@twitter.com])
+AC_INIT([vireo], [1.0], [media-platform@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
 AC_PROG_CC

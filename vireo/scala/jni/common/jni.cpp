@@ -382,7 +382,9 @@ void ExceptionHandler::JavaExceptionToNativeException(JNIEnv *env, const jthrowa
     auto exception = Wrap(env, exception_obj);
     auto msg_obj = (jstring)exception.call<jobject>("toString", "()Ljava/lang/String;");
     const char* msg_str = env->GetStringUTFChars(msg_obj, NULL);
-    throw error::Exception(msg_str);
+    string msg_str_copy = msg_str;
+    env->ReleaseStringUTFChars(msg_obj, msg_str);
+    throw error::Exception(msg_str_copy.c_str());
   }
 }
 

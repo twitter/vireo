@@ -22,12 +22,6 @@ struct _Data {
   const Y* bytes;
   X capacity;
   function<void(Y*)> deleter;
-  void clear() {
-    if (deleter) {
-      deleter((Y*)bytes);
-      bytes = nullptr;
-    }
-  }
 };
 
 template <typename Y, typename X>
@@ -65,7 +59,6 @@ Data<Y, X>::Data(const string& path)
 template <typename Y, typename X>
 Data<Y, X>::Data(Data&& data) noexcept
   : domain::Interval<Data<Y, X>, Y, X>(data.a(), data.b()) {
-  delete _this;
   _this = data._this;
   data._this = nullptr;
 }
@@ -114,9 +107,9 @@ auto Data<Y, X>::operator=(const Data& data) -> Data& {
 
 template <typename Y, typename X>
 auto Data<Y, X>::operator=(Data&& data) -> Data& {
-  CHECK(_this && data._this);
+  CHECK(data._this);
   this->set_bounds(data.a(), data.b());
-  if (_this->deleter) {
+  if (_this && _this->deleter) {
     _this->deleter((Y*)_this->bytes);
   }
   delete _this;

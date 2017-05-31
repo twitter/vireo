@@ -22,6 +22,16 @@ public:
   ANNEXB(const common::Data32& data);
   DISALLOW_COPY_AND_ASSIGN(ANNEXB);
   auto operator()(uint32_t index) const -> NalInfo<NalType>;
+  static auto GetNalType(const common::Data32& data) -> NalType;
+  static auto StartCodePrefixSize(const common::Data32& data) -> uint8_t {
+    if (data.count() >= 4 && data(data.a()) == 0x00 && data(data.a() + 1) == 0x00 && data(data.a() + 2) == 0x00 && data(data.a() + 3) == 0x01) {  // 4-byte start code prefix
+      return 4;
+    } else if (data.count() >= 3 && data(data.a()) == 0x00 && data(data.a() + 1) == 0x00 && data(data.a() + 2) == 0x01) {  // 3-byte start code prefix
+      return 3;
+    } else {
+      return 0;
+    }
+  };
 };
 
 auto annexb_to_avcc(common::Data32& data, uint8_t nalu_length_size) -> void;

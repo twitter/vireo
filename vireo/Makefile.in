@@ -90,9 +90,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = remux$(EXEEXT) stitch$(EXEEXT) thumbnails$(EXEEXT) \
-	transcode$(EXEEXT) trim$(EXEEXT) unchunk$(EXEEXT) \
-	validate$(EXEEXT) viddiff$(EXEEXT)
+bin_PROGRAMS = frames$(EXEEXT) remux$(EXEEXT) stitch$(EXEEXT) \
+	thumbnails$(EXEEXT) transcode$(EXEEXT) trim$(EXEEXT) \
+	unchunk$(EXEEXT) validate$(EXEEXT) viddiff$(EXEEXT)
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__append_1 = scala/jni/common/jni.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/decode.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/encode.cpp \
@@ -215,6 +215,10 @@ libvireo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libvireo_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
+am_frames_OBJECTS = tools/remux/frames-main.$(OBJEXT) \
+	tests/frames-test_common.$(OBJEXT)
+frames_OBJECTS = $(am_frames_OBJECTS)
+frames_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
 am_remux_OBJECTS = tools/remux/remux-main.$(OBJEXT) \
 	tests/remux-test_common.$(OBJEXT)
 remux_OBJECTS = $(am_remux_OBJECTS)
@@ -281,13 +285,14 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libvireo_la_SOURCES) $(remux_SOURCES) $(stitch_SOURCES) \
-	$(thumbnails_SOURCES) $(transcode_SOURCES) $(trim_SOURCES) \
-	$(unchunk_SOURCES) $(validate_SOURCES) $(viddiff_SOURCES)
-DIST_SOURCES = $(am__libvireo_la_SOURCES_DIST) $(remux_SOURCES) \
+SOURCES = $(libvireo_la_SOURCES) $(frames_SOURCES) $(remux_SOURCES) \
 	$(stitch_SOURCES) $(thumbnails_SOURCES) $(transcode_SOURCES) \
 	$(trim_SOURCES) $(unchunk_SOURCES) $(validate_SOURCES) \
 	$(viddiff_SOURCES)
+DIST_SOURCES = $(am__libvireo_la_SOURCES_DIST) $(frames_SOURCES) \
+	$(remux_SOURCES) $(stitch_SOURCES) $(thumbnails_SOURCES) \
+	$(transcode_SOURCES) $(trim_SOURCES) $(unchunk_SOURCES) \
+	$(validate_SOURCES) $(viddiff_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -504,6 +509,9 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ../imagecore
 libvireo_la_CPPFLAGS = -I./ -I../ -I../thirdparty/l-smash_extra \
 	$(am__append_2)
+frames_CPPFLAGS = -I../
+frames_SOURCES = tools/remux/main.cpp  tests/test_common.cpp
+frames_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 remux_CPPFLAGS = -I../
 remux_SOURCES = tools/remux/main.cpp  tests/test_common.cpp
 remux_LDADD = ./libvireo.la ../imagecore/libimagecore.la
@@ -895,7 +903,7 @@ tools/remux/$(am__dirstamp):
 tools/remux/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) tools/remux/$(DEPDIR)
 	@: > tools/remux/$(DEPDIR)/$(am__dirstamp)
-tools/remux/remux-main.$(OBJEXT): tools/remux/$(am__dirstamp) \
+tools/remux/frames-main.$(OBJEXT): tools/remux/$(am__dirstamp) \
 	tools/remux/$(DEPDIR)/$(am__dirstamp)
 tests/$(am__dirstamp):
 	@$(MKDIR_P) tests
@@ -903,6 +911,14 @@ tests/$(am__dirstamp):
 tests/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) tests/$(DEPDIR)
 	@: > tests/$(DEPDIR)/$(am__dirstamp)
+tests/frames-test_common.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+frames$(EXEEXT): $(frames_OBJECTS) $(frames_DEPENDENCIES) $(EXTRA_frames_DEPENDENCIES) 
+	@rm -f frames$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(frames_OBJECTS) $(frames_LDADD) $(LIBS)
+tools/remux/remux-main.$(OBJEXT): tools/remux/$(am__dirstamp) \
+	tools/remux/$(DEPDIR)/$(am__dirstamp)
 tests/remux-test_common.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -1106,6 +1122,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@settings/$(DEPDIR)/libvireo_la-settings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sound/$(DEPDIR)/libvireo_la-pcm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sound/$(DEPDIR)/libvireo_la-sound.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/frames-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/remux-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/stitch-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/thumbnails-test_common.Po@am__quote@
@@ -1114,6 +1131,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/unchunk-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/validate-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/viddiff-test_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tools/remux/$(DEPDIR)/frames-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/remux/$(DEPDIR)/remux-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/stitch/$(DEPDIR)/stitch-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/thumbnails/$(DEPDIR)/thumbnails-main.Po@am__quote@
@@ -1522,6 +1540,34 @@ scala/jni/vireo/libvireo_la-util.lo: scala/jni/vireo/util.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='scala/jni/vireo/util.cpp' object='scala/jni/vireo/libvireo_la-util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scala/jni/vireo/libvireo_la-util.lo `test -f 'scala/jni/vireo/util.cpp' || echo '$(srcdir)/'`scala/jni/vireo/util.cpp
+
+tools/remux/frames-main.o: tools/remux/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/remux/frames-main.o -MD -MP -MF tools/remux/$(DEPDIR)/frames-main.Tpo -c -o tools/remux/frames-main.o `test -f 'tools/remux/main.cpp' || echo '$(srcdir)/'`tools/remux/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/remux/$(DEPDIR)/frames-main.Tpo tools/remux/$(DEPDIR)/frames-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/remux/main.cpp' object='tools/remux/frames-main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/remux/frames-main.o `test -f 'tools/remux/main.cpp' || echo '$(srcdir)/'`tools/remux/main.cpp
+
+tools/remux/frames-main.obj: tools/remux/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/remux/frames-main.obj -MD -MP -MF tools/remux/$(DEPDIR)/frames-main.Tpo -c -o tools/remux/frames-main.obj `if test -f 'tools/remux/main.cpp'; then $(CYGPATH_W) 'tools/remux/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/remux/main.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/remux/$(DEPDIR)/frames-main.Tpo tools/remux/$(DEPDIR)/frames-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/remux/main.cpp' object='tools/remux/frames-main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/remux/frames-main.obj `if test -f 'tools/remux/main.cpp'; then $(CYGPATH_W) 'tools/remux/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/remux/main.cpp'; fi`
+
+tests/frames-test_common.o: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/frames-test_common.o -MD -MP -MF tests/$(DEPDIR)/frames-test_common.Tpo -c -o tests/frames-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/frames-test_common.Tpo tests/$(DEPDIR)/frames-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/frames-test_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/frames-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+
+tests/frames-test_common.obj: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/frames-test_common.obj -MD -MP -MF tests/$(DEPDIR)/frames-test_common.Tpo -c -o tests/frames-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/frames-test_common.Tpo tests/$(DEPDIR)/frames-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/frames-test_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/frames-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
 
 tools/remux/remux-main.o: tools/remux/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(remux_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/remux/remux-main.o -MD -MP -MF tools/remux/$(DEPDIR)/remux-main.Tpo -c -o tools/remux/remux-main.o `test -f 'tools/remux/main.cpp' || echo '$(srcdir)/'`tools/remux/main.cpp
