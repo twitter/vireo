@@ -2,6 +2,8 @@
 //  Licensed under the Apache License, Version 2.0
 //  http://www.apache.org/licenses/LICENSE-2.0
 
+#include "vireo/base_cpp.h"
+#include "vireo/dependency.hpp"
 #include "vireo/demux/movie.h"
 #include "vireo/internal/demux/image.h"
 #include "vireo/internal/demux/mp2ts.h"
@@ -66,10 +68,65 @@ struct _Movie {
   Track<SampleType::Audio> audio;
   Track<SampleType::Data> data;
   Track<SampleType::Caption> caption;
+  template <FileType Ftyp, typename Supported = typename has_dependency<Ftyp>::type>
+  void parse(common::Reader&& reader) {
+    THROW_IF(true, MissingDependency);
+  }
 };
 
-Movie::Movie(common::Reader&& reader) : _this(make_shared<_Movie>()), audio_track(_this), video_track(_this), data_track(_this), caption_track(_this) {
+template<>
+void _Movie::parse<FileType::MP4, std::true_type>(common::Reader&& reader) {
+  file_type = FileType::MP4;
+  mp4_decoder.reset(new internal::demux::MP4(move(reader)));
+  video.track = functional::Video<decode::Sample>(mp4_decoder->video_track);
+  video.duration = mp4_decoder->video_track.duration();
+  video.edit_boxes.insert(video.edit_boxes.end(),
+                          mp4_decoder->video_track.edit_boxes().begin(),
+                          mp4_decoder->video_track.edit_boxes().end());
+  audio.track = functional::Audio<decode::Sample>(mp4_decoder->audio_track);
+  audio.duration = mp4_decoder->audio_track.duration();
+  audio.edit_boxes.insert(audio.edit_boxes.end(),
+                          mp4_decoder->audio_track.edit_boxes().begin(),
+                          mp4_decoder->audio_track.edit_boxes().end());
+  caption.track = functional::Caption<decode::Sample>(mp4_decoder->caption_track);
+  caption.duration = mp4_decoder->caption_track.duration();
+  caption.edit_boxes.insert(caption.edit_boxes.end(),
+                            mp4_decoder->caption_track.edit_boxes().begin(),
+                            mp4_decoder->caption_track.edit_boxes().end());
+}
 
+template<>
+void _Movie::parse<FileType::MP2TS, std::true_type>(common::Reader&& reader) {
+  file_type = FileType::MP2TS;
+  mp2ts_decoder.reset(new internal::demux::MP2TS(move(reader)));
+  video.track = functional::Video<decode::Sample>(mp2ts_decoder->video_track);
+  video.duration = mp2ts_decoder->video_track.duration();
+  audio.track = functional::Audio<decode::Sample>(mp2ts_decoder->audio_track);
+  audio.duration = mp2ts_decoder->audio_track.duration();
+  data.track = functional::Data<decode::Sample>(mp2ts_decoder->data_track);
+  caption.track = functional::Caption<decode::Sample>(mp2ts_decoder->caption_track);
+  caption.duration = mp2ts_decoder->caption_track.duration();
+}
+
+template<>
+void _Movie::parse<FileType::WebM, std::true_type>(common::Reader&& reader) {
+  file_type = FileType::WebM;
+  webm_decoder.reset(new internal::demux::WebM(move(reader)));
+  video.track = functional::Video<decode::Sample>(webm_decoder->video_track);
+  video.duration = webm_decoder->video_track.duration();
+  audio.track = functional::Audio<decode::Sample>(webm_decoder->audio_track);
+  audio.duration = webm_decoder->audio_track.duration();
+}
+
+template<>
+void _Movie::parse<FileType::Image, std::true_type>(common::Reader&& reader) {
+  file_type = FileType::Image;
+  image_decoder.reset(new internal::demux::Image(move(reader)));
+  video.track = functional::Video<decode::Sample>(image_decoder->track);
+  video.duration = image_decoder->track.duration();
+}
+
+Movie::Movie(common::Reader&& reader) : _this(make_shared<_Movie>()), audio_track(_this), video_track(_this), data_track(_this), caption_track(_this) {
   vector<vector<uint8_t>> supported_ftyps = { internal::demux::kWebMFtyp, internal::demux::kMP2TSFtyp };
   supported_ftyps.insert(supported_ftyps.end(), internal::demux::kImageFtyps.begin(), internal::demux::kImageFtyps.end());
 
@@ -79,47 +136,17 @@ Movie::Movie(common::Reader&& reader) : _this(make_shared<_Movie>()), audio_trac
   }
   common::Data32 data = reader.read(0, read_len);
   THROW_IF(data.count() != read_len, ReaderError, "not enough data to check file ftyp");
+
   if (util::FtypUtil::Matches(internal::demux::kImageFtyps, data)) {
-    _this->file_type = FileType::Image;
-    _this->image_decoder.reset(new internal::demux::Image(move(reader)));
-    _this->video.track = functional::Video<decode::Sample>(_this->image_decoder->track);
-    _this->video.duration = _this->image_decoder->track.duration();
+    _this->parse<FileType::Image>(move(reader));
   } else if (util::FtypUtil::Matches(internal::demux::kMP2TSFtyp, data)) {
-    _this->file_type = FileType::MP2TS;
-    _this->mp2ts_decoder.reset(new internal::demux::MP2TS(move(reader)));
-    _this->video.track = functional::Video<decode::Sample>(_this->mp2ts_decoder->video_track);
-    _this->video.duration = _this->mp2ts_decoder->video_track.duration();
-    _this->audio.track = functional::Audio<decode::Sample>(_this->mp2ts_decoder->audio_track);
-    _this->audio.duration = _this->mp2ts_decoder->audio_track.duration();
-    _this->data.track = functional::Data<decode::Sample>(_this->mp2ts_decoder->data_track);
-    _this->caption.track = functional::Caption<decode::Sample>(_this->mp2ts_decoder->caption_track);
-    _this->caption.duration = _this->mp2ts_decoder->caption_track.duration();
+    _this->parse<FileType::MP2TS>(move(reader));
   } else if (util::FtypUtil::Matches(internal::demux::kWebMFtyp, data)) {
-    _this->file_type = FileType::WebM;
-    _this->webm_decoder.reset(new internal::demux::WebM(move(reader)));
-    _this->video.track = functional::Video<decode::Sample>(_this->webm_decoder->video_track);
-    _this->video.duration = _this->webm_decoder->video_track.duration();
-    _this->audio.track = functional::Audio<decode::Sample>(_this->webm_decoder->audio_track);
-    _this->audio.duration = _this->webm_decoder->audio_track.duration();
+    _this->parse<FileType::WebM>(move(reader));
   } else {
-    _this->file_type = FileType::MP4;
-    _this->mp4_decoder.reset(new internal::demux::MP4(move(reader)));
-    _this->video.track = functional::Video<decode::Sample>(_this->mp4_decoder->video_track);
-    _this->video.duration = _this->mp4_decoder->video_track.duration();
-    _this->video.edit_boxes.insert(_this->video.edit_boxes.end(),
-                                   _this->mp4_decoder->video_track.edit_boxes().begin(),
-                                   _this->mp4_decoder->video_track.edit_boxes().end());
-    _this->audio.track = functional::Audio<decode::Sample>(_this->mp4_decoder->audio_track);
-    _this->audio.duration = _this->mp4_decoder->audio_track.duration();
-    _this->audio.edit_boxes.insert(_this->audio.edit_boxes.end(),
-                                   _this->mp4_decoder->audio_track.edit_boxes().begin(),
-                                   _this->mp4_decoder->audio_track.edit_boxes().end());
-    _this->caption.track = functional::Caption<decode::Sample>(_this->mp4_decoder->caption_track);
-    _this->caption.duration = _this->mp4_decoder->caption_track.duration();
-    _this->caption.edit_boxes.insert(_this->caption.edit_boxes.end(),
-                                     _this->mp4_decoder->caption_track.edit_boxes().begin(),
-                                     _this->mp4_decoder->caption_track.edit_boxes().end());
+    _this->parse<FileType::MP4>(move(reader));
   }
+
   video_track.set_bounds(_this->video.track.a(), _this->video.track.b());
   video_track._settings = _this->video.track.settings();
   _this->video.enforce_unique_pts_dts();

@@ -64,8 +64,11 @@ void print_usage(const string name) {
   cout << std::left << std::setw(opt_len) << "--square:"          << std::left << std::setw(desc_len) << "crop to 1:1 aspect ratio" << "(default: false)" << endl;
   cout << std::left << std::setw(opt_len) << "-o, -optimization:" << std::left << std::setw(desc_len) << optimization_info.str() << optimization_defaults.str() << endl;
   cout << std::left << std::setw(opt_len) << "-r, -crf:"          << std::left << std::setw(desc_len) << crf_info.str() << crf_defaults.str() << endl;
+  cout << std::left << std::setw(opt_len) << "-rc_method:"        << std::left << std::setw(desc_len) << "video rate control method: " << "(CRF: 0, CBR:1, ABR: 2)" << endl;
+  cout << std::left << std::setw(opt_len) << "-fps:"              << std::left << std::setw(desc_len) << "video framerate: " << "(default: input video's fps)" << endl;
   cout << std::left << std::setw(opt_len) << "-q, -quantizer:"    << std::left << std::setw(desc_len) << quantizer_info.str() << quantizer_defaults.str() << endl;
-  cout << std::left << std::setw(opt_len) << "-vbitrate:"         << std::left << std::setw(desc_len) << "max video bitrate, to cap CRF in extreme (allocate VBV buffer)" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-vbitrate:"         << std::left << std::setw(desc_len) << "max video bitrate" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-vmaxbitrate:"      << std::left << std::setw(desc_len) << "max video max bitrate" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-dthreads:"         << std::left << std::setw(desc_len) << "H.264 decoder thread count" << "(default: 1)" << endl;
   cout << std::left << std::setw(opt_len) << "-ethreads:"         << std::left << std::setw(desc_len) << "H.264 encoder thread count" << "(default: 1)" << endl;
   cout << std::left << std::setw(opt_len) << "--vonly:"           << std::left << std::setw(desc_len) << "transcode only video" << "(default: false)" << endl;
@@ -75,8 +78,24 @@ void print_usage(const string name) {
   cout << std::left << std::setw(opt_len) << "--dashdata:"        << std::left << std::setw(desc_len) << "transcode dash data" << "(default: false)" << endl;
   cout << std::left << std::setw(opt_len) << "--dashinit:"        << std::left << std::setw(desc_len) << "transcode dash initializer" << "(default: false)" << endl;
   cout << std::left << std::setw(opt_len) << "--samplesonly:"     << std::left << std::setw(desc_len) << "transcode mp4 in samples only mode" << "(default: false)" << endl;
-  cout << std::left << std::setw(opt_len) << "--vprofile:"        << std::left << std::setw(desc_len) << "video profile to be used for transcoding, baseline, main or high" << "(default: baseline)" << endl;
+  cout << std::left << std::setw(opt_len) << "-vprofile:"         << std::left << std::setw(desc_len) << "video profile to be used for transcoding, baseline, main or high" << "(default: baseline)" << endl;
+  cout << std::left << std::setw(opt_len) << "-refs:"             << std::left << std::setw(desc_len) << "number of references" << "(default: 3)" << endl;
+  cout << std::left << std::setw(opt_len) << "--mixed_refs:"      << std::left << std::setw(desc_len) << "allow each mb partition to have its own reference number" << "(default: 1)" << endl;
+  cout << std::left << std::setw(opt_len) << "-rc_look_ahead:"    << std::left << std::setw(desc_len) << "number of frames used mb-tree ratecontrol and vbv-lookahead" << "(default: 40)" << endl;
+  cout << std::left << std::setw(opt_len) << "-aq_mode:"          << std::left << std::setw(desc_len) << "adaptive quantization mode" << "(none: 0, variance: 1, auto variance: 2, auto variance biased: 3, default: 1)" << endl;
+  cout << std::left << std::setw(opt_len) << "--2nd_pass:"        << std::left << std::setw(desc_len) << "start 2nd pass for dual pass encoding" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-trellis:"          << std::left << std::setw(desc_len) << "performs trellis quantization" << "(default: 1)" << endl;
+  cout << std::left << std::setw(opt_len) << "-qp_min:"           << std::left << std::setw(desc_len) << "minimum quantizer" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-keyint_max:"       << std::left << std::setw(desc_len) << "maximum interval between IDR-frames" << "(default: 1<<30)" << endl;
+  cout << std::left << std::setw(opt_len) << "-keyint_min:"       << std::left << std::setw(desc_len) << "minimum interval between IDR-frames" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "--b_rc_mbtree:"     << std::left << std::setw(desc_len) << "macroblock tree ratecontrol" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-stats_log_path:"   << std::left << std::setw(desc_len) << "input/output path for stats file" << "(default: \"\")" << endl;
+  cout << std::left << std::setw(opt_len) << "--rc_b_mb_tree:"    << std::left << std::setw(desc_len) << "enable mb_tree rate control" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-pyramid_mode:"     << std::left << std::setw(desc_len) << "allow the use of B-frames as references for other frames" << "(none: 0, strcit: 1, normal: 2, default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "-me_method:"        << std::left << std::setw(desc_len) << "motion estimation method" << "(DIA: 0, HEX: 1, UMH: 2, ESA: 3, TESA: 4, default: 1)" << endl;
+  cout << std::left << std::setw(opt_len) << "-subpel_refine:"    << std::left << std::setw(desc_len) << "subpixel motion estimation quality" << "(default: 4)" << endl;
 }
+
 
 struct Config {
   int iterations = 1;
@@ -87,21 +106,40 @@ struct Config {
   int optimization = -1; // -1 indicates not set by user. default value is populated later
   float crf = kH264DefaultCRF;
   int quantizer = kVP8DefaultQuantizer;
+  int video_bitrate = 0;
   int max_video_bitrate = 0;
+  int buffer_size = 0;
+  float buffer_init = 0;
   int decoder_threads = 1;
   int encoder_threads = 1;
   bool video_only = false;
   int audio_bitrate = kDefaultAudioBitrateInKb * 1024;
   bool audio_only = false;
   int bframes = 0;
+  encode::PyramidMode pyramid_mode = encode::PyramidMode::Normal;
   bool dash_data = false;
   bool dash_init = false;
   bool samples_only = false;
-  vireo::encode::VideoProfileType vprofile = vireo::encode::VideoProfileType::Baseline;
+  encode::VideoProfileType vprofile = encode::VideoProfileType::Baseline;
 
   string infile = "";
   string outfile = "";
   FileType outfile_type = UnknownFileType;
+  encode::RCMethod rc_method = encode::RCMethod::CRF;
+  uint32_t frame_references = 3;
+  bool mixed_refs = true;
+  uint32_t rc_look_ahead =40;
+  bool is_second_pass = false;
+  encode::AdaptiveQuantizationMode aq_mode = encode::AdaptiveQuantizationMode::Variance;
+  uint32_t trellis = 1;
+  uint32_t qp_min = 0;
+  uint32_t keyint_max = encode::kDefaultH264KeyintMax;
+  uint32_t keyint_min = encode::kDefaultH264KeyintMin;
+  bool rc_b_mb_tree = false;
+  string stats_log_path = "";
+  int fps = -1;
+  encode::MotionEstimationMethod me_method = encode::MotionEstimationMethod::Hexagon;
+  uint32_t subpel_refine = 4;
 };
 
 int parse_arguments(int argc, const char* argv[], Config& config) {
@@ -167,6 +205,14 @@ int parse_arguments(int argc, const char* argv[], Config& config) {
       config.quantizer = arg_quantizer;
       last_arg = i + 1;
     } else if (strcmp(argv[i], "-vbitrate") == 0) {
+      int arg_video_bitrate = atoi(argv[++i]);
+      if (arg_video_bitrate < 0) {
+        cerr << "video bitrate has to be non-negative" << endl;
+        return 1;
+      }
+      config.video_bitrate = (int)arg_video_bitrate;
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-vmaxbitrate") == 0) {
       int arg_max_video_bitrate = atoi(argv[++i]);
       if (arg_max_video_bitrate < 0) {
         cerr << "video max bitrate has to be non-negative" << endl;
@@ -216,7 +262,7 @@ int parse_arguments(int argc, const char* argv[], Config& config) {
     } else if (strcmp(argv[i], "--samplesonly") == 0) {
       config.samples_only = true;
       last_arg = i + 1;
-    } else if (strcmp(argv[i], "--vprofile") == 0) {
+    } else if (strcmp(argv[i], "-vprofile") == 0) {
       if (strcmp(argv[++i], "baseline") == 0) {
         config.vprofile = vireo::encode::VideoProfileType::Baseline;
       } else if (strcmp(argv[i], "main") == 0){
@@ -227,6 +273,54 @@ int parse_arguments(int argc, const char* argv[], Config& config) {
         cerr << "only baseline, main or high profile is supported" << endl;
         return 1;
       }
+    } else if (strcmp(argv[i], "-rc_method") == 0) {
+      config.rc_method = (vireo::encode::RCMethod)atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-refs") == 0) {
+      config.frame_references = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "--mixed_refs") == 0) {
+      config.mixed_refs = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-rc_look_ahead") == 0) {
+      config.rc_look_ahead = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "--2nd_pass") == 0) {
+      config.is_second_pass = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-aq_mode") == 0) {
+      auto mode = atoi(argv[++i]);
+      config.aq_mode = encode::AdaptiveQuantizationMode(mode);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-trellis") == 0) {
+      config.trellis = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-qp_min") == 0) {
+      config.qp_min = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-keyint_max") == 0) {
+      config.keyint_max = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-keyint_min") == 0) {
+      config.keyint_min = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "--rc_b_mb_tree") == 0) {
+      config.rc_b_mb_tree = (bool)atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-stats_log_path") == 0) {
+      config.stats_log_path = argv[++i];
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-fps") == 0) {
+      config.fps = atoi(argv[++i]);
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-pyramid_mode") == 0) {
+      config.pyramid_mode = encode::PyramidMode(atoi(argv[++i]));
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-me_method") == 0) {
+      config.me_method = encode::MotionEstimationMethod(atoi(argv[++i]));
+      last_arg = i + 1;
+    } else if (strcmp(argv[i], "-subpel_refine") == 0) {
+      config.subpel_refine = atoi(argv[++i]);
       last_arg = i + 1;
     }
   }
@@ -334,12 +428,18 @@ functional::Video<encode::Sample> transcode(const functional::Video<decode::Samp
     if (out_width != in_width || out_height != in_height) {
       cout << ", resized from " << in_width << "x" << in_height;
     }
+    cout << endl << "video framerate = " << fps << "fps";
     cout << endl << "Optimization = " << config.optimization;
     if (config.outfile_type == MP4 || config.outfile_type == MP2TS) {
-      cout << ", CRF = " << config.crf  << ", number of b-frames = " << config.bframes;
+      if (config.rc_method == vireo::encode::RCMethod::CRF) {
+        cout << ", CRF = " << config.crf  << ", number of b-frames = " << config.bframes;
+      } else {
+        cout << ", bitrate = " << config.video_bitrate;
+      }
     } else {
       cout << ", Quantizer = " << config.quantizer;
     }
+
     if (config.max_video_bitrate) {
       cout << ", max bitrate = " << config.max_video_bitrate;
     }
@@ -400,19 +500,13 @@ functional::Video<encode::Sample> transcode(const functional::Video<decode::Samp
     }
   );
 
-  auto output_video_settings = decoder.settings();
-  output_video_settings.width = out_width;
-  output_video_settings.height = out_height;
-  output_video_settings.orientation = settings::Video::Landscape;
+  auto output_video_settings = settings::Settings<SampleType::Video>(decoder.settings().codec, out_width, out_height, video_settings.timescale, settings::Video::Landscape, decoder.settings().sps_pps);
 
   if (config.outfile_type == MP4 || config.outfile_type == MP2TS) {
-    encode::H264Params params(
-      encode::H264Params::ComputationalParams(config.optimization, config.encoder_threads),
-      encode::H264Params::RateControlParams(encode::RCMethod::CRF, config.crf, config.max_video_bitrate),
-      encode::H264Params::GopParams(config.bframes),
-      config.vprofile,
-      fps
-    );
+    auto computation = encode::H264Params::ComputationalParams(config.optimization, config.encoder_threads);
+    auto rc = encode::H264Params::RateControlParams(config.rc_method, config.crf, config.max_video_bitrate, config.video_bitrate, config.buffer_size, config.buffer_init, config.rc_look_ahead, config.is_second_pass, config.rc_b_mb_tree, config.aq_mode, config.qp_min, config.stats_log_path, config.mixed_refs, config.trellis, config.me_method, config.subpel_refine);
+    auto gop = encode::H264Params::GopParams(config.bframes, config.pyramid_mode, config.keyint_max, config.keyint_min, config.frame_references);
+    encode::H264Params params(computation, rc, gop, config.vprofile, fps);
     return encode::H264(functional::Video<frame::Frame>(decoder, output_video_settings), params);
   } else {
     return encode::VP8(functional::Video<frame::Frame>(decoder, output_video_settings), config.quantizer, config.optimization, fps, config.max_video_bitrate);
@@ -517,8 +611,9 @@ int main(int argc, const char* argv[]) {
 
       // Get output video track
       auto output_video_track = functional::Video<encode::Sample>();
+      auto fps = (config.fps == -1) ? movie.video_track.fps() : config.fps;
       if (transcode_video) {
-        output_video_track = transcode(movie.video_track, movie.video_track.fps(), movie.video_track.edit_boxes(), config, first_pts_and_timescale, i == 0);
+        output_video_track = transcode(movie.video_track, fps, movie.video_track.edit_boxes(), config, first_pts_and_timescale, i == 0);
       }
 
       // Get output audio track

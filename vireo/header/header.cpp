@@ -6,6 +6,7 @@ extern "C" {
 #include "lsmash.h"
 }
 #include "vireo/common/security.h"
+#include "vireo/common/util.h"
 #include "vireo/base_cpp.h"
 #include "vireo/constants.h"
 #include "vireo/error/error.h"
@@ -41,9 +42,19 @@ auto SPS_PPS::operator=(SPS_PPS&& sps_pps) -> void {
   nalu_length_size = sps_pps.nalu_length_size;
 }
 
+auto SPS_PPS::operator==(const SPS_PPS& sps_pps) const -> bool {
+  return (nalu_length_size == sps_pps.nalu_length_size &&
+          sps == sps_pps.sps &&
+          pps == sps_pps.pps);
+}
+
+auto SPS_PPS::operator!=(const SPS_PPS& sps_pps) const -> bool {
+  return !(*this == sps_pps);
+}
+
 auto SPS_PPS::as_extradata(ExtraDataType type) const -> common::Data16 {
   switch (type) {
-    case avcc: {
+    case iso: {
       lsmash_codec_specific_t* cs = lsmash_create_codec_specific_data(LSMASH_CODEC_SPECIFIC_DATA_TYPE_ISOM_VIDEO_H264,
                                                                       LSMASH_CODEC_SPECIFIC_FORMAT_STRUCTURED);
       CHECK(cs);
@@ -77,6 +88,21 @@ auto SPS_PPS::as_extradata(ExtraDataType type) const -> common::Data16 {
       data[offset++] = 0x1;
       memcpy(data + offset, (void*)pps.data(), pps.count());
       return header;
+    }
+    case avcc: {
+      const uint16_t sps_size = sps.count();
+      const uint16_t pps_size = pps.count();
+      const uint16_t length = sps_size + pps_size + 2 * nalu_length_size;
+      common::Data16 sps_pps_data(new uint8_t[length], length, [](uint8_t* p) { delete[] p; });
+      common::util::write_nal_size(sps_pps_data, sps_size, nalu_length_size);
+      sps_pps_data.set_bounds(sps_pps_data.a() + nalu_length_size, length);
+      sps_pps_data.copy(sps);
+      sps_pps_data.set_bounds(sps_pps_data.a() + sps_size, length);
+      common::util::write_nal_size(sps_pps_data, pps_size, nalu_length_size);
+      sps_pps_data.set_bounds(sps_pps_data.a() + nalu_length_size, length);
+      sps_pps_data.copy(pps);
+      sps_pps_data.set_bounds(0, length);
+      return sps_pps_data;
     }
   }
 }

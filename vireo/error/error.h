@@ -17,6 +17,7 @@ enum ErrorCategory {
   Uninitialized = 9,          // state of an object is uninitialized
   Unsafe = 10,                // due to enforced security limits
   Unsupported = 11,           // unsupported data (e.g. unsupported video codec)
+  MissingDependency = 12,     // built without required library
 };
 
 const static char* kErrorCategoryToString[] = {
@@ -32,6 +33,7 @@ const static char* kErrorCategoryToString[] = {
   "uninitialized",
   "unsafe",
   "unsupported",
+  "missing dependency",
 };
 
 const static char* kErrorCategoryToGenericReason[] = {
@@ -47,6 +49,7 @@ const static char* kErrorCategoryToGenericReason[] = {
   "unexpected error, please report back",
   "file is currently unsupported",
   "file is currently unsupported",
+  "built without the library required",
 };
 
 #ifndef __EXCEPTIONS

@@ -2,17 +2,11 @@
 //  Licensed under the Apache License, Version 2.0
 //  http://www.apache.org/licenses/LICENSE-2.0
 
-extern "C" {
-#include "libswscale/swscale.h"
-}
 #include "vireo/base_cpp.h"
+#include "vireo/common/ref.h"
 #include "vireo/constants.h"
 #include "vireo/error/error.h"
-#include "vireo/common/enum.hpp"
-#include "vireo/common/ref.h"
 #include "vireo/sound/pcm.h"
-
-#include "vireo/tests/test_common.h"
 
 namespace vireo {
 namespace sound {

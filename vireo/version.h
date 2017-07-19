@@ -1,1 +1,1 @@
-#define VIREO_VERSION "2.4.10"
+#define VIREO_VERSION "2.4.15"

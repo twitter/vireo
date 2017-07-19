@@ -232,7 +232,7 @@ class MP4Creator {
       }
     }
 
-#if TWITTER_INTERNAL
+#ifdef TWITTER_INTERNAL
     lsmash_sample = write_data ? lsmash_create_sample(lsmash_sample_size) : lsmash_create_no_data_sample(lsmash_sample_size);
 #else
     lsmash_sample = lsmash_create_sample(lsmash_sample_size);

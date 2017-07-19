@@ -1,5 +1,7 @@
 AC_INIT([imagecore], [1.0], [media-platform@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
+AM_SILENT_RULES([yes])
+AC_CONFIG_MACRO_DIRS([../m4])
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG([C++])

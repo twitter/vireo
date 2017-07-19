@@ -20,7 +20,6 @@ extern "C" {
 #include "vireo/header/header.h"
 #include "vireo/internal/decode/avcc.h"
 #include "vireo/internal/decode/types.h"
-#include "vireo/internal/decode/util.h"
 #include "vireo/internal/demux/mp4.h"
 #include "vireo/settings/settings.h"
 #include "vireo/types.h"
@@ -191,7 +190,10 @@ struct _MP4 {
     }
 
     bool success = false;
-    int ret = h264_parse_sps(&h264_info, h264_info.buffer.rbsp, (uint8_t*)(sps.data() + 1), sps.count() - 1);
+    int ret = 0;
+    if (sps.count()) {
+      ret = h264_parse_sps(&h264_info, h264_info.buffer.rbsp, (uint8_t*)(sps.data() + 1), sps.count() - 1);
+    }
     h264_cleanup_parser(&h264_info);
     if (ret == 0 && h264_info.sps.vui.sar_width != 0 && h264_info.sps.vui.sar_height != 0) {
       par.x = h264_info.sps.vui.sar_width;

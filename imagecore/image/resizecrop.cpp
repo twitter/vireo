@@ -83,6 +83,9 @@ int ResizeCropOperation::performResizeCrop(ImageRGBA*& resizedImage)
 	Image* image = NULL;
 	if( performResizeCrop(image) == IMAGECORE_SUCCESS && image != NULL ) {
 		resizedImage = image->asRGBA();
+    if (resizedImage != NULL) {
+      return IMAGECORE_SUCCESS;
+    }
 	}
 	return IMAGECORE_UNKNOWN_ERROR;
 }

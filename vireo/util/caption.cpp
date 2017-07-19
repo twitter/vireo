@@ -2,9 +2,9 @@
 //  Licensed under the Apache License, Version 2.0
 //  http://www.apache.org/licenses/LICENSE-2.0
 
+#include "vireo/common/util.h"
 #include "vireo/util/caption.h"
 #include "vireo/internal/decode/types.h"
-#include "vireo/internal/decode/util.h"
 
 #define EMULATION_PREVENTION_BYTE 0x03
 #define USER_DATA_REGISTERED_ITU_T_T35 0x04
@@ -97,7 +97,7 @@ uint32_t copy_caption_payloads_to_caption_data(const common::Data32& data, commo
     caption_size += 2;
     // write nalu size
     caption_data_copy.set_bounds(0, nalu_length_size);
-    internal::decode::write_nal_size(caption_data_copy, caption_size, nalu_length_size);
+    common::util::write_nal_size(caption_data_copy, caption_size, nalu_length_size);
     caption_size += nalu_length_size;
   }
 

@@ -156,8 +156,6 @@ struct _Stitch {
       THROW_IF(video_settings.width != video.settings.width, InvalidArguments);
       THROW_IF(video_settings.height != video.settings.height, InvalidArguments);
       THROW_IF(video_settings.orientation != video.settings.orientation, InvalidArguments);
-      THROW_IF(video_settings.sps_pps.sps != video.settings.sps_pps.sps, InvalidArguments);
-      THROW_IF(video_settings.sps_pps.pps != video.settings.sps_pps.pps, InvalidArguments);
       auto video_samples = video_track.vectorize();
       adjust_timescale(video_samples, video.settings.timescale, video_settings.timescale);
 

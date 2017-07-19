@@ -6,6 +6,7 @@
 
 #include "vireo/base_h.h"
 #include "vireo/common/data.h"
+#include "vireo/common/util.h"
 #include "vireo/internal/decode/types.h"
 #include "vireo/internal/decode/util.h"
 
@@ -25,5 +26,6 @@ public:
 };
 
 auto avcc_to_annexb(const common::Data32& data, uint8_t nalu_length_size) -> common::Data32;
+auto contain_sps_pps(const common::Data32& data, uint8_t nalu_length_size) -> bool;
 
 }}}

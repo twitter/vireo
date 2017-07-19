@@ -15,13 +15,12 @@ extern "C" {
 #include "vireo/internal/decode/annexb.h"
 #include "vireo/internal/decode/avcc.h"
 #include "vireo/internal/decode/types.h"
-#include "vireo/internal/decode/util.h"
 #include "vireo/mux/mp2ts.h"
 #include "vireo/util/caption.h"
 #include "vireo/version.h"
 
 CONSTRUCTOR static void _Init() {
-#if TWITTER_INTERNAL
+#ifdef TWITTER_INTERNAL
   extern AVOutputFormat ff_mpegts_muxer;
   av_register_output_format(&ff_mpegts_muxer);
 #else
@@ -382,7 +381,7 @@ struct _MP2TS {
 
     std::vector<common::Data32> video_packet;
     // add SPS/PPS before each keyframe
-    if (sample.keyframe) {
+    if (sample.keyframe && !internal::decode::contain_sps_pps(sample.nal, nalu_length_size)) {
       // Convert sps_pps from Data16 to Data32. emplace_back will create a
       // Data32 object with the contents of sps_pps.
       // sps_pps is still responsible for memory clean up. Make sure it lives

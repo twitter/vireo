@@ -39,20 +39,20 @@ vireo is built based on the following principles:
 
 ### Build requirements:
   - autotools
-  - libswscale
-  - libavformat
-  - libavcodec
-  - libavutil
+  - libswscale (optional)
+  - libavformat (optional)
+  - libavcodec (optional)
+  - libavutil (optional)
   - liblsmash
-  - libx264
-  - libvpx
-  - libwebm
-  - libvorbis
-  - libvorbisenc
-  - libfdk-aac
-  - libogg
-  - libpng
-  - libjpeg
+  - libx264 (optional)
+  - libvpx (optional)
+  - libwebm (optional)
+  - libvorbis (optional)
+  - libvorbisenc (optional)
+  - libfdk-aac (optional)
+  - libogg (optional)
+  - libpng (optional)
+  - libjpeg (optional)
 
 ### C++
 
@@ -117,6 +117,13 @@ To see the usage of the tool simply execute:
 ```
 
 The exception is the `validate` tool which requires `validate -h` to show usage as it will just start listening STDIN for input otherwise.
+
+# Development Guidelines
+
+* Make sure you have a **detailed description** about the change in the CR.
+* **Prefer code readability** over fast development and premature performance optimizations.
+* **If you're making assumptions** (can happen due to lack of enough test data, confusing documentation in the standard, or you're simply not implementing a rare edge case in order to decrease code complexity and development cost), **make sure they are documented in code**. Both with a `THROW_IF(..., Unsupported, "reason")` (or `CHECK(...)`) and ideally in comments as well.
+* If there is any API or functionality change, make sure the affected tools (`remux`, `transcode` etc.) are also updated.
 
 # Code Examples
 

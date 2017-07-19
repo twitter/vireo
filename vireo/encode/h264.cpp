@@ -15,7 +15,6 @@ extern "C" {
 #define X264_NALU_LENGTH_SIZE 4
 #define X264_PROFILE "main"
 #define X264_TUNE "ssim"
-const static uint32_t kMaxDelay = 64;
 
 static vireo::encode::VideoProfileType GetDefaultProfile(const int width, const int height) {
   auto min_dimension = min(width, height);
@@ -37,6 +36,8 @@ struct _H264 {
   unique_ptr<x264_t, decltype(&x264_encoder_close)> encoder = { NULL, [](x264_t* encoder) { if (encoder) x264_encoder_close(encoder); } };
   functional::Video<frame::Frame> frames;
   uint32_t num_cached_frames = 0;
+  uint32_t num_threads = 0;
+  uint32_t max_delay = 0;
   static inline const char* const GetProfile(VideoProfileType profile) {
     THROW_IF(profile != VideoProfileType::Baseline && profile != VideoProfileType::Main && profile != VideoProfileType::High, Unsupported, "unsupported profile type");
     switch (profile) {
@@ -78,7 +79,7 @@ H264::H264(const functional::Video<frame::Frame>& frames, const H264Params& para
     param.b_annexb = 0;
     param.b_repeat_headers = 0;
     param.b_vfr_input = 0;
-    param.b_sliced_threads = 1; // use slice based multithreading
+
     if (params.gop.num_bframes >= 0) { // if num_bframes < 0, use default settings
       param.i_bframe = params.gop.num_bframes;
       param.i_bframe_pyramid = params.gop.pyramid_mode;
@@ -87,9 +88,34 @@ H264::H264(const functional::Video<frame::Frame>& frames, const H264Params& para
       param.rc.i_lookahead = 0;
       param.i_sync_lookahead = 0;
       param.rc.b_mb_tree = 0;
+      param.b_sliced_threads = 1;
     }
 
-    switch (params.rc.method) {
+    if (!params.rc.stats_log_path.empty()) {
+      if (!params.rc.is_second_pass) {
+        param.rc.b_stat_write = true;
+        param.rc.psz_stat_out = (char*)params.rc.stats_log_path.c_str();
+      } else {
+        param.rc.b_stat_read = true;
+        param.rc.psz_stat_in = (char*)params.rc.stats_log_path.c_str();
+      }
+      param.rc.b_mb_tree = params.rc.enable_mb_tree;
+      param.rc.i_lookahead = params.rc.look_ahead;
+      param.rc.i_aq_mode = params.rc.aq_mode;
+      param.rc.i_qp_min = params.rc.qp_min;
+      param.i_frame_reference = params.gop.frame_references;
+      param.analyse.b_mixed_references = params.rc.mixed_refs;
+      param.analyse.i_trellis = params.rc.trellis;
+      param.analyse.i_me_method = params.rc.me_method;
+      param.analyse.i_me_range = 16;
+      param.analyse.i_subpel_refine = params.rc.subpel_refine;
+      param.i_keyint_max = params.gop.keyint_max;
+      param.i_keyint_min = params.gop.keyint_min;
+      param.b_sliced_threads = 0;
+      param.i_lookahead_threads = 1;
+    }
+
+    switch (params.rc.rc_method) {
       case RCMethod::CRF:
         param.rc.i_rc_method = X264_RC_CRF;
         THROW_IF(params.rc.crf < kH264MinCRF || params.rc.crf > kH264MaxCRF, InvalidArguments);
@@ -109,9 +135,7 @@ H264::H264(const functional::Video<frame::Frame>& frames, const H264Params& para
         break;
       case RCMethod::ABR:
         param.rc.i_rc_method = X264_RC_ABR;
-        param.rc.i_vbv_max_bitrate = params.rc.max_bitrate;
-        param.rc.i_vbv_buffer_size = params.rc.buffer_size;
-        param.rc.f_vbv_buffer_init = params.rc.buffer_init;
+        param.rc.i_bitrate = params.rc.bitrate;
         break;
 
       default: // USE CRF as default mode
@@ -123,6 +147,8 @@ H264::H264(const functional::Video<frame::Frame>& frames, const H264Params& para
     THROW_IF(x264_param_apply_profile(&param, _H264::GetProfile(params.profile)) < 0, InvalidArguments);
   }
   _this->frames = frames;
+  _this->num_threads = params.computation.thread_count;
+  _this->max_delay = params.computation.thread_count + params.rc.look_ahead + params.gop.num_bframes;
   {  // Encoder
     _this->encoder.reset(x264_encoder_open(&param));
     CHECK(_this->encoder);
@@ -153,12 +179,12 @@ auto H264::operator()(uint32_t index) const -> Sample {
   x264_nal_t* nals = nullptr;
   int i_nals;
   x264_picture_t out_picture;
-  int size = 0;
+  int video_size = 0;
   auto has_more_frames_to_encode = [_this = _this, &index]() -> bool {
     return index + _this->num_cached_frames < _this->frames.count();
   };
   if (has_more_frames_to_encode()) {
-    while (size == 0 && has_more_frames_to_encode()) {
+    while (video_size == 0 && has_more_frames_to_encode()) {
       const frame::Frame frame = _this->frames(index + _this->num_cached_frames);
       const uint64_t pts = frame.pts;
       const frame::YUV yuv = frame.yuv();
@@ -175,22 +201,39 @@ auto H264::operator()(uint32_t index) const -> Sample {
       in_picture.img.i_stride[0] = (int)yuv.plane(frame::Y).row();
       in_picture.img.i_stride[1] = (int)yuv.plane(frame::U).row();
       in_picture.img.i_stride[2] = (int)yuv.plane(frame::V).row();
-      size = x264_encoder_encode(_this->encoder.get(), &nals, &i_nals, &in_picture, &out_picture);
-      _this->num_cached_frames += (size == 0);
-      THROW_IF(_this->num_cached_frames > kMaxDelay, Unsupported);
+      video_size = x264_encoder_encode(_this->encoder.get(), &nals, &i_nals, &in_picture, &out_picture);
+      _this->num_cached_frames += (video_size == 0);
+      THROW_IF(_this->num_cached_frames > _this->max_delay, Unsupported);
     }
   }
   if (!has_more_frames_to_encode()) {
     CHECK(_this->num_cached_frames > 0);
-    size = x264_encoder_encode(_this->encoder.get(), &nals, &i_nals, nullptr, &out_picture); // flush out cached frames
+    uint32_t thread = 0;
+    while (video_size == 0 && (_this->num_threads == 0 || thread < _this->num_threads)) {
+      CHECK(thread < kH264MaxThreadCount);
+      video_size = x264_encoder_encode(_this->encoder.get(), &nals, &i_nals, nullptr, &out_picture); // flush out cached frames
+      thread++;
+    }
     _this->num_cached_frames--;
   }
-  CHECK(size > 0);
+  CHECK(video_size > 0);
   CHECK(nals);
   CHECK(i_nals != 0);
   CHECK(out_picture.i_pts >= 0);
-  const auto nal = common::Data32(nals[0].p_payload, size, NULL);
-  return Sample(out_picture.i_pts,  out_picture.i_dts, (bool)out_picture.b_keyframe, SampleType::Video, nal);
+  const auto video_nal = common::Data32(nals[0].p_payload, video_size, NULL);
+  if (out_picture.b_keyframe) {
+    common::Data16 sps_pps_data = _settings.sps_pps.as_extradata(header::SPS_PPS::ExtraDataType::avcc);
+    uint32_t sps_pps_size = sps_pps_data.count();
+    uint32_t video_sample_data_size = sps_pps_size + video_size;
+    common::Data32 video_sample_data = common::Data32(new uint8_t[video_sample_data_size], video_sample_data_size, [](uint8_t* p) { delete[] p; });
+    video_sample_data.copy(common::Data32(sps_pps_data.data(), sps_pps_size, nullptr));
+    video_sample_data.set_bounds(video_sample_data.a() + sps_pps_size, video_sample_data_size);
+    video_sample_data.copy(video_nal);
+    video_sample_data.set_bounds(0, video_sample_data_size);
+    return Sample(out_picture.i_pts,  out_picture.i_dts, (bool)out_picture.b_keyframe, SampleType::Video, video_sample_data);
+  } else {
+    return Sample(out_picture.i_pts,  out_picture.i_dts, (bool)out_picture.b_keyframe, SampleType::Video, video_nal);
+  }
 }
 
 }}

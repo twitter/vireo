@@ -13,24 +13,6 @@
 namespace vireo {
 namespace encode {
 
-enum RCMethod {
-  CRF = 0,
-  CBR = 1,
-  ABR = 2
-};
-
-enum PyramidMode {
-  None = 0,
-  Strict = 1,
-  Normal = 2
-};
-
-enum VideoProfileType {
-  ConstrainedBaseline = 0,
-  Baseline = 1,
-  Main = 2,
-  High = 3
-};
 const static char* kVideoProfileTypeToString[] = { "constrained baseline", "baseline", "main", "high" };
 
 

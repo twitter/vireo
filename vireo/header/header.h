@@ -19,7 +19,9 @@ struct SPS_PPS {
   SPS_PPS(SPS_PPS&& sps_pps) noexcept;
   auto operator=(const SPS_PPS& sps_pps) -> void;
   auto operator=(SPS_PPS&& sps_pps) -> void;
-  enum ExtraDataType { avcc, annex_b };
+  auto operator==(const SPS_PPS& x) const -> bool;
+  auto operator!=(const SPS_PPS& x) const -> bool;
+  enum ExtraDataType { iso, annex_b, avcc };
   auto as_extradata(ExtraDataType type) const -> common::Data16;
 };
 

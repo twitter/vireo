@@ -3,11 +3,10 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 
 #include "vireo/base_cpp.h"
+#include "vireo/common/util.h"
 #include "vireo/error/error.h"
 #include "vireo/internal/decode/annexb.h"
 #include "vireo/internal/decode/h264_bytestream.h"
-#include "vireo/internal/decode/util.h"
-
 #define NALU_LENGTH_SIZE 4
 
 namespace vireo {
@@ -76,7 +75,7 @@ auto H264_BYTESTREAM::operator()(uint32_t index) const -> function<RawSample(voi
     common::Data32 nal = common::Data32(new uint8_t[size + NALU_LENGTH_SIZE],
                                         size + NALU_LENGTH_SIZE,
                                         [](uint8_t* bytes){ delete[] bytes; });
-    write_nal_size(nal, size, NALU_LENGTH_SIZE);
+    common::util::write_nal_size(nal, size, NALU_LENGTH_SIZE);
     nal.set_bounds(NALU_LENGTH_SIZE, nal.b());
     nal.copy(sample.nal);
     nal.set_bounds(0, nal.b());

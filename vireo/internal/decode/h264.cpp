@@ -15,7 +15,7 @@ extern "C" {
 #include "vireo/error/error.h"
 
 CONSTRUCTOR static void _Init() {
-#if TWITTER_INTERNAL
+#ifdef TWITTER_INTERNAL
   extern AVCodec ff_h264_decoder;
   avcodec_register(&ff_h264_decoder);
 #else
@@ -83,7 +83,7 @@ H264::H264(const functional::Video<Sample>& track, uint32_t thread_count) {
   }
   THROW_IF(thread_count > 16, InvalidArguments);
   const auto& sps_pps = settings.sps_pps;
-  auto extradata = sps_pps.as_extradata(header::SPS_PPS::avcc);
+  auto extradata = sps_pps.as_extradata(header::SPS_PPS::iso);
   THROW_IF(extradata.count() > security::kMaxHeaderSize * 2, Unsafe);
   const uint16_t padded_size = (size_t)extradata.count() + FF_INPUT_BUFFER_PADDING_SIZE;
   common::Data16 extradata_padded = { (const uint8_t*)calloc(padded_size, sizeof(uint8_t)), padded_size, [](uint8_t* p) { free(p); } };

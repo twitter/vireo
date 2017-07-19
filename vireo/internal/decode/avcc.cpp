@@ -6,7 +6,6 @@
 #include "vireo/error/error.h"
 #include "vireo/internal/decode/avcc.h"
 #include "vireo/internal/decode/types.h"
-#include "vireo/internal/decode/util.h"
 
 const static uint8_t kAnnexBStartCodeSize = 4;
 
@@ -101,6 +100,23 @@ auto avcc_to_annexb(const common::Data32& data, uint8_t nalu_length_size) -> com
   }
   out.set_bounds(0, out.capacity());
   return move(out);
+}
+
+auto contain_sps_pps(const common::Data32& data, uint8_t nalu_length_size) -> bool {
+  common::Data32 _data = common::Data32(data.data() + data.a(), data.count(), nullptr);
+  AVCC<H264NalType> avcc_parser(_data, nalu_length_size);
+  bool has_sps = false;
+  bool has_pps = false;
+  for (const auto& nal_info : avcc_parser) {
+    if (nal_info.type == H264NalType::SPS) {
+      has_sps = true;
+    }
+    if (nal_info.type == H264NalType::PPS) {
+      has_pps = true;
+    }
+  }
+  THROW_IF((has_sps && !has_pps) || (!has_sps && has_pps), Unsupported);
+  return has_sps && has_pps;
 }
 
 }}}

@@ -6,8 +6,8 @@
 
 #include "vireo/base_h.h"
 #include "vireo/common/data.h"
+#include "vireo/common/util.h"
 #include "vireo/internal/decode/types.h"
-#include "vireo/internal/decode/util.h"
 
 namespace vireo {
 namespace internal {

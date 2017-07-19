@@ -13,9 +13,11 @@ extern "C" {
 #include "vireo/common/enum.hpp"
 #include "vireo/common/reader.h"
 #include "vireo/common/security.h"
+#include "vireo/common/util.h"
 #include "vireo/constants.h"
 #include "vireo/decode/types.h"
 #include "vireo/error/error.h"
+#include "vireo/header/header.h"
 #include "vireo/internal/decode/annexb.h"
 #include "vireo/internal/decode/types.h"
 #include "vireo/internal/demux/mp2ts.h"
@@ -25,7 +27,7 @@ const static uint8_t kNaluLengthSize = 4;
 const static uint8_t kNumTracks = 4;
 
 CONSTRUCTOR static void _Init() {
-#if TWITTER_INTERNAL
+#ifdef TWITTER_INTERNAL
   extern AVInputFormat ff_mpegts_demuxer;
   av_register_input_format(&ff_mpegts_demuxer);
 #else
@@ -122,8 +124,8 @@ struct _MP2TS {
     uint16_t width = 0;
     uint16_t height = 0;
     settings::Video::Codec codec = settings::Video::Codec::Unknown;
-    unique_ptr<common::Data16> sps = nullptr;
-    unique_ptr<common::Data16> pps = nullptr;
+    vector<header::SPS_PPS> sps_pps;
+    vector<common::Data16> sps_pps_extradatas; // same as sps_pps, just processed via as_extradata
     PacketCache cache;
   } video;
 
@@ -305,21 +307,20 @@ struct _MP2TS {
         info = annexb_parser(index);
         THROW_IF(info.type != H264NalType::PPS, Invalid);
         common::Data16 packet_pps = common::Data16(packet_data.data() + info.byte_offset, info.size, nullptr);
+        auto sps_pps = header::SPS_PPS(packet_sps, packet_pps, kNaluLengthSize);
+        auto sps_pps_extradata = sps_pps.as_extradata(header::SPS_PPS::ExtraDataType::annex_b);
 
-        // Save SPS/PPS from first packet and ensure all other SPS/PPS match
-        if (tracks(SampleType::Video).initialized) {
-          THROW_IF(*video.sps != packet_sps, Invalid);
-          THROW_IF(*video.pps != packet_pps, Invalid);
-        } else {
+        // Save all unique SPS / PPS
+        if (video.sps_pps_extradatas.empty() || video.sps_pps_extradatas.back() != sps_pps_extradata) {
+          video.sps_pps.push_back(sps_pps);
+          video.sps_pps_extradatas.push_back(sps_pps_extradata);
+        }
+
+        // Mark track as initialized
+        if (!tracks(SampleType::Video).initialized) {
           video.width = packet_width;
           video.height = packet_height;
           THROW_IF(!security::valid_dimensions(video.width, video.height), Unsafe);
-          common::Data16* sps_ptr = new common::Data16(new uint8_t[packet_sps.count()], packet_sps.count(), [](uint8_t* p){ delete[] p; });
-          sps_ptr->copy(packet_sps);
-          video.sps.reset(sps_ptr);
-          common::Data16* pps_ptr = new common::Data16(new uint8_t[packet_pps.count()], packet_pps.count(), [](uint8_t* p){ delete[] p; });
-          pps_ptr->copy(packet_pps);
-          video.pps.reset(pps_ptr);
           tracks(SampleType::Video).initialized = true;
         }
       }
@@ -349,7 +350,14 @@ struct _MP2TS {
         THROW_IF(byte_offset < 0, Invalid);
         common::Data32 packet_video = common::Data32(packet_data.data() + byte_offset, packet_data.b() - byte_offset, nullptr);
         CHECK(packet_video.count());
+
+        if (keyframe) {
+          CHECK(video.sps_pps_extradatas.size() > 0);
+          const auto& sps_pps_extradata = video.sps_pps_extradatas.back();
+          contents.emplace_back(sps_pps_extradata.data() + sps_pps_extradata.a(), sps_pps_extradata.count(), nullptr);
+        }
         contents.push_back(packet_video);
+
         if (tracks(SampleType::Video).samples.size()) {
           int64_t prev_dts = tracks(SampleType::Video).samples.back().dts;
           THROW_IF(dts < prev_dts, Invalid);
@@ -508,8 +516,6 @@ struct _MP2TS {
         if (codec_context->codec_id == AV_CODEC_ID_H264) {
           video.codec = settings::Video::Codec::H264;
         } else {
-          video.sps.reset(nullptr);
-          video.pps.reset(nullptr);
           THROW_IF(codec_context->codec_id != AV_CODEC_ID_H264, Unsupported);
         }
       } else if (type == SampleType::Audio) {
@@ -572,7 +578,7 @@ struct _MP2TS {
             dts_offsets_per_sample.push_back(dts_offset_per_sample);
           }
         }
-        uint32_t last_dts_offset;
+        uint64_t last_dts_offset;
         if (type == SampleType::Audio) {
           last_dts_offset = common::round_divide<uint64_t>((uint64_t) kMP2TSTimescale * AUDIO_FRAME_SIZE, audio.samples_per_packet.back(), audio.sample_rate);
         } else {
@@ -599,8 +605,8 @@ struct _MP2TS {
         } else {
           int64_t dts_offset_this_sample = (int64_t) kMP2TSTimescale * current_sample * AUDIO_FRAME_SIZE / audio.sample_rate;
           CHECK(dts_offset_this_sample);
-          sample.pts = start_pts + dts_offset_this_sample;
-          sample.dts = start_dts + dts_offset_this_sample;
+          sample.pts = (uint32_t)(start_pts + dts_offset_this_sample);
+          sample.dts = (uint32_t)(start_dts + dts_offset_this_sample);
         }
         current_sample++;
       }
@@ -628,15 +634,14 @@ MP2TS::MP2TS(common::Reader&& reader)
     caption_track.set_bounds(0, (uint32_t)_this->tracks(SampleType::Caption).samples.size());
 
     if (_this->tracks(SampleType::Video).initialized) {
-      CHECK(_this->video.sps.get());
-      CHECK(_this->video.pps.get());
+      CHECK(_this->video.sps_pps.size() > 0);
       video_track._settings = (settings::Video){
         _this->video.codec,
         _this->video.width,
         _this->video.height,
         _this->tracks(SampleType::Video).timescale,
         settings::Video::Orientation::Landscape,
-        header::SPS_PPS(*_this->video.sps, *_this->video.pps, kNaluLengthSize)
+        _this->video.sps_pps.front()
       };
     }
     if (_this->tracks(SampleType::Audio).initialized) {
@@ -661,8 +666,6 @@ MP2TS::MP2TS(common::Reader&& reader)
       };
     }
   } else {
-    _this->video.sps.reset(nullptr);
-    _this->video.pps.reset(nullptr);
     THROW_IF(true, Uninitialized);
   }
 }

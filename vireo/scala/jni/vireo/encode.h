@@ -23,7 +23,7 @@ JNIEXPORT jobject JNICALL Java_com_twitter_vireo_encode_jni_Vorbis_sample(JNIEnv
 JNIEXPORT void    JNICALL Java_com_twitter_vireo_encode_jni_Vorbis_freeSample(JNIEnv*, jobject, jlong, jobject);
 
 // H264
-JNIEXPORT void    JNICALL Java_com_twitter_vireo_encode_jni_H264_jniInit(JNIEnv*, jobject, jobject, jint, jint, jbyte, jfloat, jint, jint, jint, jfloat, jint, jbyte, jbyte, jfloat);
+JNIEXPORT void    JNICALL Java_com_twitter_vireo_encode_jni_H264_jniInit(JNIEnv*, jobject, jobject, jint, jint, jbyte, jfloat, jint, jint, jint, jfloat, jint, jboolean, jboolean, jbyte, jint, jstring,  jboolean, jint, jbyte, jint, jint, jbyte, jint, jint, jint, jbyte, jfloat);
 JNIEXPORT void    JNICALL Java_com_twitter_vireo_encode_jni_H264_jniClose(JNIEnv*, jobject);
 JNIEXPORT jobject JNICALL Java_com_twitter_vireo_encode_jni_H264_sample(JNIEnv*, jobject, jlong, jint, jboolean);
 JNIEXPORT void    JNICALL Java_com_twitter_vireo_encode_jni_H264_freeSample(JNIEnv*, jobject, jlong, jobject);

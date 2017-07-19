@@ -196,7 +196,7 @@ struct _JNIH264EncodeStruct : public jni::Struct<common::Data32> {
   }
 };
 
-void JNICALL Java_com_twitter_vireo_encode_jni_H264_jniInit(JNIEnv* env, jobject h264_obj, jobject frames_obj, jint optimization, jint thread_count, jbyte rc_method, jfloat crf, jint max_bitrate, jint bitrate, jint buffer_size, jfloat buffer_init, jint num_bframes, jbyte pyramid_mode, jbyte profile, jfloat fps) {
+void JNICALL Java_com_twitter_vireo_encode_jni_H264_jniInit(JNIEnv* env, jobject h264_obj, jobject frames_obj, jint optimization, jint thread_count, jbyte rc_method, jfloat crf, jint max_bitrate, jint bitrate, jint buffer_size, jfloat buffer_init, jint look_ahead, jboolean is_second_pass, jboolean enable_mb_tree, jbyte aq_mode, jint qp_min, jstring stats_log_path, jboolean mixed_refs, jint trellis, jbyte me_method, jint subpel_refine, jint num_bframes, jbyte pyramid_mode, jint keyint_max, jint keyint_min, jint frame_references, jbyte profile, jfloat fps) {
   jni::ExceptionHandler::SafeExecuteFunction(env, [&] {
     auto jni_h264 = jni::Wrap(env, h264_obj);
     auto jni = new _JNIH264EncodeStruct();
@@ -219,9 +219,11 @@ void JNICALL Java_com_twitter_vireo_encode_jni_H264_jniInit(JNIEnv* env, jobject
     CHECK(settings_obj);
     const auto settings = jni::createVideoSettings(env, settings_obj);
     auto computation = encode::H264Params::ComputationalParams((uint32_t)optimization, (uint32_t)thread_count);
-    auto rc = encode::H264Params::RateControlParams((encode::RCMethod)rc_method, (float)crf, (uint32_t)max_bitrate,
-                                                    (uint32_t)bitrate, uint32_t(buffer_size), (float)buffer_init);
-    auto gop = encode::H264Params::GopParams((int32_t)num_bframes, (encode::PyramidMode)pyramid_mode);
+    const char* log_path = env->GetStringUTFChars(stats_log_path, NULL);
+    string log_path_string = log_path;
+    env->ReleaseStringUTFChars(stats_log_path, log_path);
+    auto rc = encode::H264Params::RateControlParams((encode::RCMethod)rc_method, (float)crf, (uint32_t) max_bitrate, (uint32_t)bitrate, (uint32_t)buffer_size, (float)buffer_init, (uint32_t)look_ahead, (bool)is_second_pass, (bool)enable_mb_tree, (encode::AdaptiveQuantizationMode)aq_mode, (uint32_t)qp_min, log_path_string, (bool)mixed_refs, (uint32_t)trellis, (encode::MotionEstimationMethod)me_method, (uint32_t)subpel_refine);
+    auto gop = encode::H264Params::GopParams((int32_t)num_bframes, (encode::PyramidMode)pyramid_mode, (uint32_t)keyint_max, (uint32_t)keyint_min, (uint32_t)frame_references);
     auto params = encode::H264Params(computation, rc, gop, (encode::VideoProfileType)profile, (float)fps);
     jni->encoder.reset(new encode::H264(functional::Video<frame::Frame>(frame_funcs, settings), params));
 
