@@ -20,8 +20,18 @@ struct PtsIndexPair {
   }
 };
 
-vector<decode::ByteRange> get_caption_ranges(const common::Data32& data);
+struct CaptionPayloadInfo {
+  vector<decode::ByteRange> byte_ranges;
+  bool valid;
+};
 
-uint32_t copy_caption_payloads_to_caption_data(const common::Data32& data, common::Data32& caption_data, const vector<decode::ByteRange>& caption_ranges, const uint8_t& nalu_length_size);
+class CaptionHandler {
+public:
+  static CaptionPayloadInfo ParsePayloadInfo(const common::Data32& sei_data);
+  static uint32_t CopyPayloadsIntoData(const common::Data32& sei_data,
+                                       const CaptionPayloadInfo& info,
+                                       const uint8_t& nalu_length_size,
+                                       common::Data32& out_data);
+};
 
 }}

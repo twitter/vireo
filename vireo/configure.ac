@@ -23,23 +23,24 @@ AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX_14([ext],[mandatory])
 
 # Handles java/scala
-AX_CHECK_JAVA_HOME
-AX_JNI_INCLUDE_DIR
 AC_ARG_ENABLE([scala],
-[  --disable-scala  Disable jni interface],
-[case "${enableval}" in
-  yes) scala=false ;;
-  no)  scala=true ;;
-  *) AC_MSG_ERROR([bad value ${enableval} for --disable-scala]) ;;
-esac],[scala=true])
-for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
-do
-  JNI_CPPFLAGS="$JNI_CPPFLAGS -I$JNI_INCLUDE_DIR"
-done
-AC_SUBST(JNI_CPPFLAGS, $JNI_CPPFLAGS)
-AC_SUBST([JAVA_HOME])
+  [AS_HELP_STRING([--enable-scala],
+                  [Enable jni interface
+                  (Default is disabled.)])],
+  [],
+  [enable_scala=no])
+if test x${enable_scala} = xyes; then
+  AX_CHECK_JAVA_HOME
+  AX_JNI_INCLUDE_DIR
+  for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+  do
+    JNI_CPPFLAGS="$JNI_CPPFLAGS -I$JNI_INCLUDE_DIR"
+  done
+  AC_SUBST(JNI_CPPFLAGS, $JNI_CPPFLAGS)
+  AC_SUBST([JAVA_HOME])
+fi
 AM_CONDITIONAL([JAVA_HOME_SET], [test ! -z "$JAVA_HOME"])
-AM_CONDITIONAL([BUILD_SCALA], [test x$scala = xtrue])
+AM_CONDITIONAL([BUILD_SCALA], [test x${enable_scala} = xyes])
 
 # Checks for libraries.
 ## Required

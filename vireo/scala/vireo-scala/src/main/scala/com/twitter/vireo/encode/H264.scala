@@ -59,7 +59,7 @@ case class RateControlParams(
   enableMbTree: Boolean = true,
   aqMode: AdaptiveQuantizationMode.AdaptiveQuantizationMode = AdaptiveQuantizationMode.Variance,
   qpMin: Int = 0,
-  statsLogPath: String = "x264_2pass.log",
+  statsLogPath: String = "",
   mixedRefs: Boolean = true,
   trellis: Int = 1,
   meMethod: MotionEstimationMethod.MotionEstimationMethod = MotionEstimationMethod.Hexagon,

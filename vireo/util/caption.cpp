@@ -13,23 +13,20 @@
 namespace vireo {
 namespace util {
 
-struct SEIPayloadInfo {
-  uint32_t payload_type;
-  uint32_t payload_size;
-  decode::ByteRange payload_range;
-  SEIPayloadInfo(uint32_t type, uint32_t size, decode::ByteRange range) : payload_type(type), payload_size(size), payload_range(range) {};
+enum SEIPayloadType {
+  Unknown = 0,
+  Caption = 1,
 };
 
-vector<decode::ByteRange> get_caption_ranges(const common::Data32& sei_data) {
-  vector<decode::ByteRange> caption_ranges;
-  uint32_t index = 1; // skip the nalu type byte
-
-  auto next_sei_info = [&sei_data, &index]() -> SEIPayloadInfo {
-    uint32_t payload_type = 0;
-    int32_t payload_size = 0;
+struct SEIPayloadInfo {
+  SEIPayloadType type;
+  decode::ByteRange byte_range;
+  SEIPayloadInfo() : type(SEIPayloadType::Unknown), byte_range(decode::ByteRange()) {};
+  SEIPayloadInfo(const common::Data32& sei_data) {
+    uint32_t index = 0;
 
     // get payload type
-    uint32_t start = sei_data.a() + index;
+    uint32_t payload_type = 0;
     while (sei_data(sei_data.a() + index) == 0xFF) { // in case the value is over 1 byte long
       payload_type += 255;
       index++;
@@ -38,6 +35,7 @@ vector<decode::ByteRange> get_caption_ranges(const common::Data32& sei_data) {
     index++;
 
     // get payload size
+    int32_t payload_size = 0;
     while (sei_data(sei_data.a() + index) == 0xFF) {
       payload_size += 255;
       index++;
@@ -45,40 +43,57 @@ vector<decode::ByteRange> get_caption_ranges(const common::Data32& sei_data) {
     payload_size += sei_data(sei_data.a() + index);
     index++;
 
-    // skip emulation prevention byte
+    // include emulation prevention byte(s) in byte range
     for (int32_t i = 0; i < payload_size - 2; i++) {
-      if ((sei_data(sei_data.a() + index + i) == 0x00) &&
-          (sei_data(sei_data.a() + index + i + 1) == 0x00) &&
-          (sei_data(sei_data.a() + index + i + 2) == EMULATION_PREVENTION_BYTE)) {
+      if (sei_data.count() <= index + i + 2) {
+        return;
+      } else if ((sei_data(sei_data.a() + index + i) == 0x00) &&
+                 (sei_data(sei_data.a() + index + i + 1) == 0x00) &&
+                 (sei_data(sei_data.a() + index + i + 2) == EMULATION_PREVENTION_BYTE)) {
         payload_size += 1;
       }
     }
 
-    uint32_t end = sei_data.a() + index + payload_size;
+    if (payload_type == USER_DATA_REGISTERED_ITU_T_T35) {
+      type = SEIPayloadType::Caption;
+    }
+    byte_range = decode::ByteRange(sei_data.a(), index + payload_size);
+  }
+};
 
-    return SEIPayloadInfo(payload_type, payload_size, decode::ByteRange(start, end - start));
-  };
+CaptionPayloadInfo CaptionHandler::ParsePayloadInfo(const common::Data32& sei_data) {
+  CaptionPayloadInfo caption_info;
+  caption_info.valid = true;
+  auto nal_copy = common::Data32(sei_data.data() + sei_data.a(), sei_data.count(), nullptr);
+  nal_copy.set_bounds(nal_copy.a() + 1, nal_copy.b()); // skip the nalu type byte
 
   // scan through the nal
-  while (index < sei_data.count() - 1) {
-    SEIPayloadInfo info = next_sei_info();
-    // extract caption data
-    if (info.payload_type == USER_DATA_REGISTERED_ITU_T_T35) { // caption data
-      caption_ranges.push_back(info.payload_range);
+  while (nal_copy.count() > 1) {  // last byte is RBSP_TRAILING_BITS
+    SEIPayloadInfo info = SEIPayloadInfo(nal_copy);
+    if (info.byte_range.available) {
+      if (info.type == SEIPayloadType::Caption) {
+        caption_info.byte_ranges.push_back(info.byte_range);
+      }
+      nal_copy.set_bounds(info.byte_range.pos + info.byte_range.size, nal_copy.b());
+    } else {
+      caption_info.valid = false;
+      break;
     }
-    index += info.payload_size;
   }
-  return caption_ranges;
+  return caption_info;
 }
 
-uint32_t copy_caption_payloads_to_caption_data(const common::Data32& data, common::Data32& caption_data, const vector<decode::ByteRange>& caption_ranges, const uint8_t& nalu_length_size) {
+uint32_t CaptionHandler::CopyPayloadsIntoData(const common::Data32& sei_data,
+                                              const CaptionPayloadInfo& info,
+                                              const uint8_t& nalu_length_size,
+                                              common::Data32& out_data) {
   uint32_t caption_size = 0;
-  common::Data32 caption_data_copy = common::Data32(caption_data.data() + caption_data.a(), caption_data.capacity() - caption_data.a(), nullptr);
-  caption_data_copy.set_bounds(caption_data_copy.a() + nalu_length_size + 1, caption_data_copy.b()); // +1 to skip the nalu type byte
-  for (auto range: caption_ranges) {
-    common::Data32 caption = common::Data32(data.data() + range.pos, range.size, nullptr);
-    caption_data_copy.copy(caption);
-    caption_data_copy.set_bounds(caption_data_copy.b(), caption_data_copy.b());
+  common::Data32 out_data_copy = common::Data32(out_data.data() + out_data.a(), out_data.capacity() - out_data.a(), nullptr);
+  out_data_copy.set_bounds(nalu_length_size + 1, nalu_length_size + 1); // +1 to skip the nalu type byte
+  for (auto range: info.byte_ranges) {
+    common::Data32 caption = common::Data32(sei_data.data() + range.pos, range.size, nullptr);
+    out_data_copy.copy(caption);
+    out_data_copy.set_bounds(out_data_copy.b(), out_data_copy.b());
     caption_size += range.size;
   }
 
@@ -91,13 +106,13 @@ uint32_t copy_caption_payloads_to_caption_data(const common::Data32& data, commo
 
   if (caption_size) {
     // write nalu trailing byte
-    write_byte(caption_data_copy, caption_data_copy.b(), RBSP_TRAILING_BITS);
+    write_byte(out_data_copy, out_data_copy.b(), RBSP_TRAILING_BITS);
     // write nalu type byte
-    write_byte(caption_data_copy, nalu_length_size, (uint8_t)internal::decode::H264NalType::SEI);
+    write_byte(out_data_copy, nalu_length_size, (uint8_t)internal::decode::H264NalType::SEI);
     caption_size += 2;
     // write nalu size
-    caption_data_copy.set_bounds(0, nalu_length_size);
-    common::util::write_nal_size(caption_data_copy, caption_size, nalu_length_size);
+    out_data_copy.set_bounds(0, nalu_length_size);
+    common::util::WriteNalSize(out_data_copy, caption_size, nalu_length_size);
     caption_size += nalu_length_size;
   }
 

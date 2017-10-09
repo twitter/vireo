@@ -12,7 +12,7 @@ namespace common {
 namespace util {
 
 template<typename T>
-static inline void write_nal_size(common::Data<uint8_t, T>& data, uint32_t nal_size, uint8_t nalu_length_size) {
+static inline void WriteNalSize(common::Data<uint8_t, T>& data, uint32_t nal_size, uint8_t nalu_length_size) {
   THROW_IF(data.count() < nalu_length_size, Invalid);
   uint8_t* bytes = (uint8_t*)data.data() + data.a();
   for (auto i = 0; i < nalu_length_size; ++i) {

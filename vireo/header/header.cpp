@@ -94,11 +94,11 @@ auto SPS_PPS::as_extradata(ExtraDataType type) const -> common::Data16 {
       const uint16_t pps_size = pps.count();
       const uint16_t length = sps_size + pps_size + 2 * nalu_length_size;
       common::Data16 sps_pps_data(new uint8_t[length], length, [](uint8_t* p) { delete[] p; });
-      common::util::write_nal_size(sps_pps_data, sps_size, nalu_length_size);
+      common::util::WriteNalSize(sps_pps_data, sps_size, nalu_length_size);
       sps_pps_data.set_bounds(sps_pps_data.a() + nalu_length_size, length);
       sps_pps_data.copy(sps);
       sps_pps_data.set_bounds(sps_pps_data.a() + sps_size, length);
-      common::util::write_nal_size(sps_pps_data, pps_size, nalu_length_size);
+      common::util::WriteNalSize(sps_pps_data, pps_size, nalu_length_size);
       sps_pps_data.set_bounds(sps_pps_data.a() + nalu_length_size, length);
       sps_pps_data.copy(pps);
       sps_pps_data.set_bounds(0, length);

@@ -747,7 +747,8 @@ auto MP4::VideoTrack::operator()(const uint32_t index) const -> Sample {
       uint32_t sei_data_size = range.size - _this->nalu_length_size;
       THROW_IF(sei_data_size > data.b() - sei_data_pos, Invalid);
       common::Data32 sei_data = common::Data32(data.data() + sei_data_pos, sei_data_size, nullptr);
-      if (!util::get_caption_ranges(sei_data).empty()) {
+      util::CaptionPayloadInfo info = util::CaptionHandler::ParsePayloadInfo(sei_data);
+      if (info.valid && !info.byte_ranges.empty()) {
         has_caption = true;
         break;
       }
@@ -858,9 +859,10 @@ auto MP4::CaptionTrack::operator()(const uint32_t index) const -> Sample {
       uint32_t sei_data_size = range.size - _this->nalu_length_size;
       THROW_IF(sei_data_size > data.b() - sei_data_pos, Invalid);
       common::Data32 sei_data = common::Data32(data.data() + sei_data_pos, sei_data_size, nullptr);
-      vector<ByteRange> caption_ranges = util::get_caption_ranges(sei_data);
-      if (!caption_ranges.empty()) {
-        uint32_t current_sei_size = util::copy_caption_payloads_to_caption_data(sei_data, caption_data, caption_ranges, _this->nalu_length_size);
+      util::CaptionPayloadInfo info = util::CaptionHandler::ParsePayloadInfo(sei_data);
+      CHECK(info.valid);
+      if (!info.byte_ranges.empty()) {
+        uint32_t current_sei_size = util::CaptionHandler::CopyPayloadsIntoData(sei_data, info, _this->nalu_length_size, caption_data);
         output_size += current_sei_size;
       }
       caption_data.set_bounds(output_size, output_size);

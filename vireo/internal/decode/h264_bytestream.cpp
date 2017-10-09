@@ -75,7 +75,7 @@ auto H264_BYTESTREAM::operator()(uint32_t index) const -> function<RawSample(voi
     common::Data32 nal = common::Data32(new uint8_t[size + NALU_LENGTH_SIZE],
                                         size + NALU_LENGTH_SIZE,
                                         [](uint8_t* bytes){ delete[] bytes; });
-    common::util::write_nal_size(nal, size, NALU_LENGTH_SIZE);
+    common::util::WriteNalSize(nal, size, NALU_LENGTH_SIZE);
     nal.set_bounds(NALU_LENGTH_SIZE, nal.b());
     nal.copy(sample.nal);
     nal.set_bounds(0, nal.b());

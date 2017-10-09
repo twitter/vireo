@@ -119,12 +119,12 @@ auto annexb_to_avcc(common::Data32& data, uint8_t nalu_length_size) -> void {
       _data.set_bounds(nal_info.byte_offset - nalu_length_size, _data.b());
       auto start_code_prefix_size = ANNEXB<H264NalType>::StartCodePrefixSize(_data);
       THROW_IF(start_code_prefix_size != nalu_length_size, Invalid);
-      common::util::write_nal_size(_data, nal_info.size, nalu_length_size);
+      common::util::WriteNalSize(_data, nal_info.size, nalu_length_size);
     }
   } else {
     common::Data32 out = common::Data32(new uint8_t[out_size], out_size, [](uint8_t* p){ delete[] p; }); 
     for (const auto& nal_info: annexb_parser) {
-      common::util::write_nal_size(out, nal_info.size, nalu_length_size);
+      common::util::WriteNalSize(out, nal_info.size, nalu_length_size);
       out.set_bounds(out.a() + nalu_length_size, out.capacity());
       _data.set_bounds(nal_info.byte_offset, nal_info.byte_offset + nal_info.size);
       out.copy(_data);

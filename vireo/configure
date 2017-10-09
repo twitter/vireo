@@ -1442,7 +1442,7 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
-  --disable-scala  Disable jni interface
+  --enable-scala          Enable jni interface (Default is disabled.)
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -6037,7 +6037,15 @@ $as_echo "#define HAVE_CXX14 1" >>confdefs.h
 
 
 # Handles java/scala
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for JAVA_HOME" >&5
+# Check whether --enable-scala was given.
+if test "${enable_scala+set}" = set; then :
+  enableval=$enable_scala;
+else
+  enable_scala=no
+fi
+
+if test x${enable_scala} = xyes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for JAVA_HOME" >&5
 $as_echo_n "checking for JAVA_HOME... " >&6; }
 # We used a fake loop so that we can use "break" to exit when the result
 # is found.
@@ -6271,24 +6279,14 @@ do
     fi
 done
 
-# Check whether --enable-scala was given.
-if test "${enable_scala+set}" = set; then :
-  enableval=$enable_scala; case "${enableval}" in
-  yes) scala=false ;;
-  no)  scala=true ;;
-  *) as_fn_error $? "bad value ${enableval} for --disable-scala" "$LINENO" 5 ;;
-esac
-else
-  scala=true
+  for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+  do
+    JNI_CPPFLAGS="$JNI_CPPFLAGS -I$JNI_INCLUDE_DIR"
+  done
+  JNI_CPPFLAGS=$JNI_CPPFLAGS
+
+
 fi
-
-for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
-do
-  JNI_CPPFLAGS="$JNI_CPPFLAGS -I$JNI_INCLUDE_DIR"
-done
-JNI_CPPFLAGS=$JNI_CPPFLAGS
-
-
  if test ! -z "$JAVA_HOME"; then
   JAVA_HOME_SET_TRUE=
   JAVA_HOME_SET_FALSE='#'
@@ -6297,7 +6295,7 @@ else
   JAVA_HOME_SET_FALSE=
 fi
 
- if test x$scala = xtrue; then
+ if test x${enable_scala} = xyes; then
   BUILD_SCALA_TRUE=
   BUILD_SCALA_FALSE='#'
 else

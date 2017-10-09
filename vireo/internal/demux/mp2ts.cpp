@@ -232,10 +232,10 @@ struct _MP2TS {
       process_h264_frame(pts, dts, packet_data);
     } else {
       // There is data that belongs to previous frame
-      CHECK(tracks(SampleType::Video).samples.size());
-      auto& sample = tracks(SampleType::Video).samples.back();
       if (offset < 0) {
         // All data belongs to the previous sample
+        CHECK(tracks(SampleType::Video).samples.size());
+        const auto& sample = tracks(SampleType::Video).samples.back();
         if (pts != AV_NOPTS_VALUE && dts != AV_NOPTS_VALUE) {
           THROW_IF(pts != sample.pts || dts != sample.dts, Invalid, "PES packet contains an invalid timestamp");
         } else {
@@ -248,7 +248,7 @@ struct _MP2TS {
         common::Data32 head_packet_data = common::Data32(packet_data.data() + packet_data.a(), offset, nullptr);
         if (video.cache.packet_data.count() == 0) {
           // All data from previous packet is already processed
-          THROW_IF(pts == sample.pts || dts == sample.dts, Invalid, "PES packet contains an invalid timestamp");
+          CHECK(tracks(SampleType::Video).samples.size());
           pad_data_to_previous_h264_frame(head_packet_data);
         } else {
           // There is cached data that needs to be processed before processing new frame data
@@ -327,16 +327,19 @@ struct _MP2TS {
 
       if (info.type == decode::H264NalType::SEI) {
         common::Data32 data = common::Data32(packet_data.data() + info.byte_offset, info.size, nullptr);
-        common::Data32 caption_data = common::Data32(new uint8_t[info.size + info.start_code_prefix_size], info.size + info.start_code_prefix_size, [](uint8_t* p) { delete[] p; });
-        vector<ByteRange> caption_ranges = util::get_caption_ranges(data);
-        if (!caption_ranges.empty()) {
-          // copy start code
-          uint32_t caption_size = util::copy_caption_payloads_to_caption_data(data, caption_data, caption_ranges, info.start_code_prefix_size);
-          common::Data32 start_code = common::Data32(packet_data.data() + info.byte_offset - info.start_code_prefix_size, info.start_code_prefix_size, nullptr);
-          caption_data.set_bounds(0, info.start_code_prefix_size);
-          caption_data.copy(start_code);
-          caption_data.set_bounds(0, caption_size);
-          caption_contents.push_back(caption_data);
+        util::CaptionPayloadInfo caption_info = util::CaptionHandler::ParsePayloadInfo(data);
+        if (caption_info.valid) {
+          if (!caption_info.byte_ranges.empty()) {
+            const uint32_t max_caption_size = info.size + kNaluLengthSize + 2; // data + nal length + nal type + trailing bits (1 byte)
+            common::Data32 caption_data = common::Data32(new uint8_t[max_caption_size], max_caption_size, [](uint8_t* p) { delete[] p; });
+            uint32_t caption_size = util::CaptionHandler::CopyPayloadsIntoData(data, caption_info, kNaluLengthSize, caption_data);
+            caption_data.set_bounds(0, caption_size);
+            caption_contents.push_back(caption_data);
+          }
+        } else {
+          CHECK(ANNEXB<H264NalType>::StartCodePrefixSize(packet_data));
+          video.cache.cache_new_packet(pts, dts, packet_data);
+          return;
         }
       }
 
@@ -389,7 +392,7 @@ struct _MP2TS {
     video.cache.clear();
   }
 
-  uint32_t process_adts_packet(int64_t pts, int64_t dts, common::Data32& packet_data) {
+  uint32_t process_adts_packet(int64_t pts, int64_t dts, common::Data32& packet_data, bool first_sample_in_packet = false) {
     // Processes a single ADTS packet from packet_data, if possible.
     // Returns the number of bytes processed from packet_data,
     // and adjusts packet_data's boundaries with the data processed.
@@ -420,11 +423,10 @@ struct _MP2TS {
     packet_data.set_bounds(packet_data.a() + header.data_size, packet_b);
 
     // Save the dts offset between packets (starting from 2nd packet) for duration calculation and PTS/DTS adjustment
-    if (tracks(SampleType::Audio).samples.size()) {
+    if (first_sample_in_packet && tracks(SampleType::Audio).samples.size()) {
       int64_t prev_dts = tracks(SampleType::Audio).samples.back().dts;
-      if (dts > prev_dts) {
-        tracks(SampleType::Audio).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
-      }
+      THROW_IF(dts < prev_dts, Invalid);
+      tracks(SampleType::Audio).dts_offsets_per_packet.push_back((uint32_t)(dts - prev_dts));
     }
 
     // Save the sample
@@ -455,7 +457,7 @@ struct _MP2TS {
     // Packet may contain multiple ADTS frames
     uint32_t num_samples = 0;
     while (packet_data.count()) {
-      uint32_t processed_bytes = process_adts_packet(pts, dts, packet_data);
+      uint32_t processed_bytes = process_adts_packet(pts, dts, packet_data, num_samples == 0);
       num_samples++;
       if (processed_bytes == 0) {
         // Reached the end. Cache.
@@ -808,7 +810,6 @@ auto MP2TS::CaptionTrack::operator()(uint32_t index) const -> Sample {
       CHECK(sample.contents.size() == 1)
       // no need to copy any data
       common::Data32 nal = sample.contents.back();
-      annexb_to_avcc(nal, kNaluLengthSize);
       return move(nal);
     }
   };

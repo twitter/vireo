@@ -82,6 +82,15 @@ auto AVCC<H264NalType>::operator()(uint32_t index) const -> NalInfo<H264NalType>
   return info;
 }
 
+static inline void WriteAnnexBStartCode(common::Data32& data) {
+  THROW_IF(data.count() <= 4, Invalid);
+  uint8_t* bytes = (uint8_t*)data.data() + data.a();
+  bytes[0] = 0x00;
+  bytes[1] = 0x00;
+  bytes[2] = 0x00;
+  bytes[3] = 0x01;
+};
+
 auto avcc_to_annexb(const common::Data32& data, uint8_t nalu_length_size) -> common::Data32 {
   common::Data32 _data = common::Data32(data.data() + data.a(), data.count(), nullptr);
   AVCC<H264NalType> avcc_parser(_data, nalu_length_size);
@@ -92,7 +101,7 @@ auto avcc_to_annexb(const common::Data32& data, uint8_t nalu_length_size) -> com
 
   common::Data32 out = common::Data32(new uint8_t[out_size], out_size, [](uint8_t* p){ delete[] p; });
   for (const auto& nal_info: avcc_parser) {
-    write_annexb_startcode(out);
+    WriteAnnexBStartCode(out);
     out.set_bounds(out.a() + kAnnexBStartCodeSize, out.capacity());
     _data.set_bounds(nal_info.byte_offset, nal_info.byte_offset + nal_info.size);
     out.copy(_data);
