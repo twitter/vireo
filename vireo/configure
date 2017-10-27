@@ -794,6 +794,7 @@ enable_option_checking
 enable_silent_rules
 enable_dependency_tracking
 enable_scala
+enable_gpl
 enable_shared
 enable_static
 with_pic
@@ -1443,6 +1444,8 @@ Optional Features:
   --disable-dependency-tracking
                           speeds up one-time build
   --enable-scala          Enable jni interface (Default is disabled.)
+  --enable-gpl            Enable components that depend on GPL libraries
+                          (Default is disabled.)
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -6304,6 +6307,15 @@ else
 fi
 
 
+# Handles GPL libraries
+# Check whether --enable-gpl was given.
+if test "${enable_gpl+set}" = set; then :
+  enableval=$enable_gpl;
+else
+  enable_gpl=no
+fi
+
+
 # Checks for libraries.
 ## Required
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lsmash_free in -llsmash" >&5
@@ -6949,7 +6961,7 @@ else
   USE_LIBWEBM_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1; then
+ if test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
   USE_LIBAVCODEC_TRUE=
   USE_LIBAVCODEC_FALSE='#'
 else
@@ -6957,7 +6969,7 @@ else
   USE_LIBAVCODEC_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1; then
+ if test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
   USE_LIBAVFORMAT_TRUE=
   USE_LIBAVFORMAT_FALSE='#'
 else
@@ -6965,7 +6977,7 @@ else
   USE_LIBAVFORMAT_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1; then
+ if test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
   USE_LIBAVUTIL_TRUE=
   USE_LIBAVUTIL_FALSE='#'
 else
@@ -7013,7 +7025,7 @@ else
   USE_LIBVPX_FALSE=
 fi
 
- if test `grep -c HAVE_LIBX264 confdefs.h` -eq 1; then
+ if test `grep -c HAVE_LIBX264 confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
   USE_LIBX264_TRUE=
   USE_LIBX264_FALSE='#'
 else
