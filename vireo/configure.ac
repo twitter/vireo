@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_INIT([vireo], m4_esyscmd_s([grep -E 'VIREO_VERSION \"(.*)\"' version.h | cut -d\" -f2]), [vireo@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIRS([../m4])
@@ -104,4 +104,5 @@ AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 AC_CONFIG_SUBDIRS([../imagecore])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([vireo.pc])
 AC_OUTPUT

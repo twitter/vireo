@@ -92,16 +92,21 @@ libvireo_la_CPPFLAGS += $(JNI_CPPFLAGS)
 endif
 endif
 
-nobase_pkginclude_HEADERS = base_cpp.h base_h.h version.h types.h constants.h
-nobase_pkginclude_HEADERS += common/bitreader.h common/data.h common/editbox.h common/math.h common/path.h common/reader.h common/ref.h common/security.h
+nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h dependency.hpp base_h.h types.h version.h
+nobase_pkginclude_HEADERS += common/bitreader.h common/data.h common/editbox.h common/enum.hpp common/math.h common/path.h common/reader.h common/ref.h common/security.h
 nobase_pkginclude_HEADERS += decode/audio.h decode/types.h decode/video.h
 nobase_pkginclude_HEADERS += demux/movie.h
-nobase_pkginclude_HEADERS += domain/util.h
+nobase_pkginclude_HEADERS += domain/interval.hpp domain/interval-transform.hpp domain/util.h
 nobase_pkginclude_HEADERS += encode/aac.h encode/h264.h encode/jpg.h encode/png.h encode/types.h encode/util.h encode/vorbis.h encode/vp8.h
 nobase_pkginclude_HEADERS += error/error.h
 nobase_pkginclude_HEADERS += frame/frame.h frame/plane.h frame/rgb.h frame/util.h frame/yuv.h
+nobase_pkginclude_HEADERS += functional/function.hpp functional/media.hpp
 nobase_pkginclude_HEADERS += header/header.h
 nobase_pkginclude_HEADERS += mux/mp2ts.h mux/mp4.h mux/webm.h
 nobase_pkginclude_HEADERS += settings/settings.h
+nobase_pkginclude_HEADERS += sound/pcm.h sound/sound.h
 nobase_pkginclude_HEADERS += transform/stitch.h transform/trim.h
 nobase_pkginclude_HEADERS += util/caption.h util/ftyp.h util/timer.h util/util.h
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = vireo.pc

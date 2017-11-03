@@ -1,4 +1,4 @@
-AC_INIT([imagecore], [1.0], [media-platform@twitter.com])
+AC_INIT([imagecore], [1.0], [vireo@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIRS([../m4])

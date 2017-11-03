@@ -1,259 +1,177 @@
 # Overview
 
-**vireo** is a C++ library with wrappers for Scala and Java for **easy** media processing on the cloud, desktop and mobile.
+Vireo is a lightweight and versatile video processing library, written in C++-11 and built with functional programming principles. It also optionally comes with light Scala wrappers that enable easy video processing within a high-level functional language.
 
-vireo is built based on the following principles:
+Vireo is built on top of best of class open source libraries, and defines a unified and modular interface for these libraries to communicate easily and efficiently. With this unified interface, it is easy to write new modules (e.g. new codec) or swap out the existing ones in favor of others (e.g. proprietary or hardware H.264 decoder).
 
-* **Ease of use**
+Vireo tries to cater towards developers that are not necessarily experts in all individual video technologies and want to focus on just building products. It is released under the MIT license and aims to make it easy for developers to do media processing and create both commercial and non-commercial (see [Legal Disclaimer](#legal-disclaimer) for details).
 
-  - high level building blocks allow coding just 'as easy' as describing behavior
+Vireo conveniently ships with a few media processing tools that are built on top of Vireo.
 
-* **Modular**
+**List of Tools:**
 
-  - has use-case independent modular building blocks
+- **frames**: displays the contents of video files (list of audio/video samples, edit boxes, track durations etc.)
+- **chunk**: chunks GOPs of the input video as well as the audio track into separate mp4 files
+- **psnr**: compares the video quality of a test video against a reference video
+- **remux**: allows remuxing an input file into other compatible containers
+- **stitch**: stitches a number of input video files into a single video file
+- **thumbnails**: extracts keyframes from the input video and saves them as JPG images
+- **transcode**: transcodes an input video into another video with different format (able to change resolution, crop, change bitrate, convert containers/codecs)
+- **trim**: trims the input video at desired time boundaries without transcoding the input video
+- **validate**: checks if the video is valid and if so, supported by vireo
+- **viddiff**: checks if two video files are functionally identical or not (does not compare data that does not affect the playback behavior)
 
-  - easy to swap any 3rd-party library
+# How to Build Vireo and Tools
 
-* **Efficient**
-
-  - executes only what is needed
-
-  - enforces minimal computation / memory usage for all use cases
-
-* **Doesn't reinvent the wheel**
-
-  - layered on top of best of class open source libraries
-
-* **'Multiresolution'**
-
-  - allows programmers to quickly get to a functional state based on high level functional logic, then refine the behavior as optimization (caching, ...) or application (distribution, parallelization) according to the need
-
-* **Portable**
-
-  - can run on the cloud, locally on your desktop or on mobile
-
-  - written in C++-11 and has 1:1 mapping with Scala
-
-
-## Using vireo in your project
-
-### Build requirements:
-  - autotools
-  - libswscale (optional)
-  - libavformat (optional)
-  - libavcodec (optional)
-  - libavutil (optional)
-  - liblsmash
-  - libx264 (optional)
-  - libvpx (optional)
-  - libwebm (optional)
-  - libvorbis (optional)
-  - libvorbisenc (optional)
-  - libfdk-aac (optional)
-  - libogg (optional)
-  - libpng (optional)
-  - libjpeg (optional)
-
-### C++
-
-To build and use vireo in your native code, simply execute
+To build and use vireo simply execute:
 
 ```
-  cd vireo
-  ./configure --prefix=/path/to/install/dir
-  make
-  make install
+    # within the main repository directory
+    $ cd vireo
+    $ export PREFIX=/path/to/install/dir
+    $ ./configure --prefix=$PREFIX
+    $ make
+    $ make install
 ```
 
-Once built, the headers will be copied under `/path/to/install/dir/include` and the compiled library will be under `/path/to/install/dir/lib/`.
+Once built, you can find
 
-If a valid JDK is found, the JNI bindings for scala will be built as well. To disable the JNI bindings, pass --disable-scala to configure.
+- the headers under `$PREFIX/include`
+- the compiled libraries under `$PREFIX/lib`
+- the tools under `$PREFIX/bin`
 
-### Scala
-
-First build and install the C++ library, then
-
-```
-  cd vireo/scala/vireo-scala
-  mvn install
-```
-
-This will produce a vireo-scala.jar in vireo-scala/target.
-
-## Tools
-
-We built a set of tools for various use cases. Please find the list of tools along with instructions on how to use them below.
-
-### C++
-
-List of tools:
-
-* **chunk**: chunks GOPs of the input video as well as the audio track into separate mp4 files.
-
-* **frames**: displays the contents of video files (list of audio/video samples, edit boxes, track durations etc.).
-
-* **psnr**: compares the video quality of a test video against a reference video.
-
-* **remux**: allows remuxing an input file into other compatible mp4 formats (used for testing DASH).
-
-* **stitch**: stitches a number of input video files into a single video file.
-
-* **thumbnails**: extracts keyframes from the input video and saves them as JPG images.
-
-* **transcode**: transcodes an input video into another video with different format (able to change resolution, crop, change bitrate, convert to H.264/MP4/MPEG-TS or VP9/WebM).
-
-* **trim**: trims the input video at desired time boundaries without transcoding the input video.
-
-* **validate**: checks if the video is valid and if so, supported by vireo.
-
-* **viddiff**: checks if two video files are functionally identical or not (does not compare data that does not affect the playback behavior)
-
-.. note:: Every tool is built and used in a similar fashion. Therefore instructions will use `mytool` as the name of the tool; just replace `mytool` with the respective tool name when executing instructions.
-
-To see the usage of the tool simply execute:
+To run a tool and see their usage, simply execute:
 
 ```
-  ../../build/release/mytool
+$ $PREFIX/bin/<tool_name>
 ```
 
-The exception is the `validate` tool which requires `validate -h` to show usage as it will just start listening STDIN for input otherwise.
+An exception to this rule is the `validate` tool which requires `validate -h` to show its usage as it uses STDIN for input.
 
-# Development Guidelines
+Please note that some of the tools listed in [List of Tools](#list-of-tools) may not be built based on the availability of optional third-party libraries listed under [Dependencies](#dependencies).
 
-* Make sure you have a **detailed description** about the change in the CR.
-* **Prefer code readability** over fast development and premature performance optimizations.
-* **If you're making assumptions** (can happen due to lack of enough test data, confusing documentation in the standard, or you're simply not implementing a rare edge case in order to decrease code complexity and development cost), **make sure they are documented in code**. Both with a `THROW_IF(..., Unsupported, "reason")` (or `CHECK(...)`) and ideally in comments as well.
-* If there is any API or functionality change, make sure the affected tools (`remux`, `transcode` etc.) are also updated.
-
-# Code Examples
-
-## Creating a video from only keyframes
-
-This example shows how to extract keyframes from an original video and package them into an MP4 file without decoding or encoding frames.
-
-.. image:: assets/keyframe-extraction.png
-   :height: 300px
-   :align: center
-
-### C++
+When compiling you can also optionally turn on C++ to Scala bindings by passing `--enable-scala` flag to `configure`. After you successfully build Vireo with these bindings, you can build the Scala wrappers by executing:
 
 ```
-  demux::Movie movie("movie.mp4");
-  auto keyframes = movie.video_track.filter([](decode::Sample& sample) { return sample.keyframe; });
-  mux::MP4 muxer(functional::Video<encode::Sample>(keyframes, encode::Sample::Convert));
-  util::save("movie_keyframes.mp4", muxer());
+    # within the main repository directory
+    $ cd vireo
+    $ ./build_scala.sh
 ```
 
-### Scala
+This will place the built jar file under `$PREFIX/lib`.
 
+## **Dependencies**
+
+## Required tools (for building C++ library)
+- [autotools](https://en.wikipedia.org/wiki/GNU_Build_System)
+- [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
+
+## Optional tools (for building Scala wrappers)
+- [maven](https://maven.apache.org/)
+
+## Required libraries
+- [L-SMASH](https://github.com/l-smash/l-smash)
+
+## Optional libraries
+The following libraries are automatically enabled if present in your system
+
+- [libpng](http://www.libpng.org/pub/png/libpng.html)
+- [libjpeg](http://libjpeg.sourceforge.net/)
+- [libfdk-aac](https://github.com/mstorsjo/fdk-aac)
+- [libvpx](https://github.com/webmproject/libvpx)
+- [libogg](https://xiph.org/ogg/)
+- [libvorbis](https://xiph.org/vorbis/)
+- [libvorbisenc](https://xiph.org/vorbis/doc/vorbisenc/index.html)
+- [libwebm](https://github.com/webmproject/libwebm)
+
+The following libraries are disabled by default. To enable GPL licensed components, `--enable-gpl` flag have to be explicitly passed to `configure` while building Vireo
+
+- [libavformat](https://github.com/FFmpeg/FFmpeg)
+- [libavcodec](https://github.com/FFmpeg/FFmpeg)
+- [libavutil](https://github.com/FFmpeg/FFmpeg)
+- [libswscale](https://github.com/FFmpeg/FFmpeg)
+- [libx264](https://www.videolan.org/developers/x264.html)
+
+## **Legal Disclaimer**
+
+This installer allows you to select various third-party, pre-installed components to build with the Vireo platform. Some of these components are provided under licenses that may be incompatible with each other, so it may not be compliant to build all of the optional components together. You are responsible to determine what components to use for your build, and for complying with the applicable licenses. In addition, the use of some of the components of the Vireo platform, including those that implement the H.264, AAC, or MPEG-4 formats, may require licenses from third party patent holders. You are responsible for determining whether your contemplated use requires such a license.
+
+# Using Vireo in Your Own Project
+
+## Code Examples
+
+To give you an idea on what you can build using Vireo, we provide 3 simple code snippets below.
+
+1. Remuxing an input file to mp4
 ```
-  for (movie <- managed(demux.Movie("movie.mp4"))) {
-    val keyframes = movie.videoTrack.filter[decode.Sample](_.keyframe)
-    for {
-      muxer <- managed(mux.MP4(keyframes.map(encode.Sample(_: decode.Sample))))
-      output <- managed(new java.io.FileOutputStream("movie_keyframes.mp4"))
-    } {
-      output.write(muxer().array())
-    }
-  }
-```
-
-## H.264 Transcoding
-
-### Scala
-
-```
-  for {
-    movie <- managed(demux.Movie("movie.mp4"))
-    decoder <- managed(decode.Video(movie.videoTrack))
-    encoder <- managed(encode.H264(decoder, 25.0f, 3, movie.videoTrack.fps()))
-    muxer <- managed(mux.MP4(encoder))
-    output <- managed(new java.io.FileOutputStream("movie_transcoded.mp4"))
-  } {
-    output.write(muxer().array())
-  }
-```
-
-The JPG encoder and H.264 encoder have a very similar interface, so a straightforward implementation is to add the YUV frame lambdas from the H.264 decoder both in H.264 and JPG encoder.
-
-```
-  for {
-    movie <- managed(demux.Movie("movie.mp4"))
-    decoder <- managed(decode.Video(movie.videoTrack))
-  } {
-    // Transcode video
-    for {
-      encoder <- managed(encode.H264(decoder, 25.0f, 3, movie.videoTrack.fps()))
-      muxer <- managed(mux.MP4(encoder))
-      output <- managed(new java.io.FileOutputStream("movie_transcoded.mp4"))
-    } {
-      output.write(muxer().array())
-    }
-    // Write JPG thumbnails
-    for (jpgEncoder <- managed(encode.JPG(decoder map { frame: Frame => frame.yuv }, 95, 1))) {
-      var index = 0
-      jpgEncoder foreach { jpgData =>
-        val filename = s"thumbnail_$index.jpg"
-        for (output <- managed(new java.io.FileOutputStream(filename))) {
-          output.write(jpgData().array())
-          index += 1
-        }
-      }
-    }
-  }
-```
-
-.. warning:: Although this example is functional, it is not optimal. With this code each keyframe is decoded **twice**! Once by the H.264 encoder and also once by the JPG encoder.
-
-As an optimization we can cache the raw frames as they are streamed into the H.264 encoder.
-
-```
-    // Cache frames
-    val frames = decoder map { frame: Frame =>
-      val yuv = frame.yuv()
-      Frame(frame.pts, () => yuv)
-    }
-    // Transcode video
-    for {
-      encoder <- managed(encode.H264(frames, 25.0f, 3, movie.videoTrack.fps()))
-      ...
-    }
-    // Write JPG thumbnails
-    for (jpgEncoder <- managed(encode.JPG(frames map { frame: Frame => frame.yuv }, 95, 1))) {
-      ...
+    /*
+     * This function works without GPL dependencies
+     */
+    void remux(string in, string out) {
+      // setup the demux -> mux pipeline
+      demux::Movie movie(in);
+      mux::MP4 muxer(movie.video_track);
+      // nothing is executed until muxer() is called
+      auto binary = muxer();
+      // save to file
+      util::save(out, binary);
     }
 ```
 
-However this does not scale well when videos have too many keyframes as raw frames are very memory heavy and we would most likely run out of memory.
-
-Instead we can embed the JPG encoder within the H.264 encoder lambda and create the thumbnail right after we decode a frame during video transcoding.
-
+2. Remuxing keyframes of an input file to mp4
 ```
-    // Transcode video and store thumbnails at the same time
-    var index = 0
-    for {
-      encoder <- managed(encode.H264(decoder map { frame: Frame =>
-        // Override frame.yuv function
-        val yuv = () => {
-          // Force decode frame
-          val yuv = frame.yuv()
-          // Write JPG thumbnail
-          val thumbnail = functional.Video(Seq(() => yuv), decoder.settings)
-          for (jpgEncoder <- managed(encode.JPG(thumbnail, 95, 1))) {
-            val filename = s"thumbnail_$index.jpg"
-            for (output <- managed(new java.io.FileOutputStream(filename))) {
-              output.write(jpgEncoder(0)().array())
-              index += 1
-            }
-          }
-          yuv
-        }
-        Frame(frame.pts, yuv)
-      }, 25.0f, 3, movie.videoTrack.fps()))
+    /*
+     * This function works without GPL dependencies
+     */
+    void keyframes(string in, string out) {
+      demux::Movie movie(in);
+      // extract keyframes using .filter operator
+      auto keyframes = movie.video_track.filter([](decode::Sample& sample) {
+        return sample.keyframe;
+      });
+      mux::MP4 muxer(keyframes);
+      // nothing is executed until muxer() is called
+      auto binary = muxer();
+      util::save(out, binary);
     }
-
 ```
 
-This is now optimal both in terms of memory and CPU usage!
+3. Transcoding an input file to mp4
+```
+    /*
+     * This function requires vireo to be built with --enable-gpl flag
+     */
+    void transcode(string in, string out) {
+      // setup the demux -> decode -> encode -> mux pipeline
+      demux::Movie movie(in);
+      decode::Video decoder(movie.video_track);
+      encode::H264 encoder(decoder, 30.0f, 3, movie.video_track.fps());
+      mux::MP4 muxer(encoder);
+      // nothing is executed until muxer() is called
+      auto binary = muxer();
+      // save to file
+      util::save(out, binary);
+      cout << "Done" << endl;
+    }
+```
 
-.. note:: This exercise is a good demonstration of the 'multiresolution' philoshophy: make a high level prototype and make further refinements as needs arise.
+## Build a HelloWorld Application with Vireo
+
+You can built your own application simply by using `pkg-config`. Just make sure you add the Vireo install directory to your `PKG_CONFIG_PATH` if you did not install Vireo to a path where `pkg-config` is already looking at.
+
+To build the examples provided in [Code Examples](#code-examples) section, simply execute the following:
+
+```
+    # within the main repository directory
+    $ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+    $ cd vireo/helloworld
+    $ g++ `pkg-config --cflags --libs vireo` -std=c++14 -o helloworld helloworld.cpp
+    $ ./helloworld
+```
+
+# Guidelines for Contributors
+
+- Make sure you have a **detailed description** about the change in your commit.
+- **Prefer code readability** over fast development and premature performance optimizations.
+- **If you're making assumptions** (can happen due to lack of enough test data, confusing documentation in the standard, or you're simply not implementing a rare edge case in order to decrease code complexity and development cost), **make sure they are documented in code**. Both with a `THROW_IF(..., Unsupported, "reason")` (or `CHECK(...)`) and ideally in comments as well.
+- If there is any API or functionality change, make sure the affected tools (`remux`, `transcode` etc.) are also updated.

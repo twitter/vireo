@@ -16,6 +16,7 @@
 
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -133,7 +134,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = vireo.pc
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -163,7 +164,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgincludedir)"
+	"$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(pkgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libvireo_la_DEPENDENCIES = ../imagecore/libimagecore.la
 am__libvireo_la_SOURCES_DIST = common/bitreader.cpp common/data.cpp \
@@ -368,6 +369,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+DATA = $(pkgconfig_DATA)
 HEADERS = $(nobase_pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -399,8 +401,9 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in compile \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(srcdir)/vireo.pc.in compile config.guess config.sub depcomp \
+	install-sh ltmain.sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -616,17 +619,22 @@ libvireo_la_SOURCES = common/bitreader.cpp common/data.cpp \
 	sound/pcm.cpp sound/sound.cpp $(am__append_9)
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
-nobase_pkginclude_HEADERS = base_cpp.h base_h.h version.h types.h \
-	constants.h common/bitreader.h common/data.h common/editbox.h \
-	common/math.h common/path.h common/reader.h common/ref.h \
-	common/security.h decode/audio.h decode/types.h decode/video.h \
-	demux/movie.h domain/util.h encode/aac.h encode/h264.h \
-	encode/jpg.h encode/png.h encode/types.h encode/util.h \
-	encode/vorbis.h encode/vp8.h error/error.h frame/frame.h \
-	frame/plane.h frame/rgb.h frame/util.h frame/yuv.h \
-	header/header.h mux/mp2ts.h mux/mp4.h mux/webm.h \
-	settings/settings.h transform/stitch.h transform/trim.h \
-	util/caption.h util/ftyp.h util/timer.h util/util.h
+nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h \
+	dependency.hpp base_h.h types.h version.h common/bitreader.h \
+	common/data.h common/editbox.h common/enum.hpp common/math.h \
+	common/path.h common/reader.h common/ref.h common/security.h \
+	decode/audio.h decode/types.h decode/video.h demux/movie.h \
+	domain/interval.hpp domain/interval-transform.hpp \
+	domain/util.h encode/aac.h encode/h264.h encode/jpg.h \
+	encode/png.h encode/types.h encode/util.h encode/vorbis.h \
+	encode/vp8.h error/error.h frame/frame.h frame/plane.h \
+	frame/rgb.h frame/util.h frame/yuv.h functional/function.hpp \
+	functional/media.hpp header/header.h mux/mp2ts.h mux/mp4.h \
+	mux/webm.h settings/settings.h sound/pcm.h sound/sound.h \
+	transform/stitch.h transform/trim.h util/caption.h util/ftyp.h \
+	util/timer.h util/util.h
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = vireo.pc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -680,6 +688,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+vireo.pc: $(top_builddir)/config.status $(srcdir)/vireo.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -1901,6 +1911,27 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-pkgconfigDATA: $(pkgconfig_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgconfigdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkgconfigdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pkgconfigdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pkgconfigdir)" || exit $$?; \
+	done
+
+uninstall-pkgconfigDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(pkgconfigdir)'; $(am__uninstall_files_from_dir)
 install-nobase_pkgincludeHEADERS: $(nobase_pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(nobase_pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
@@ -2222,12 +2253,13 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) config.h
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS) \
+		config.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -2336,7 +2368,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-nobase_pkgincludeHEADERS
+install-data-am: install-nobase_pkgincludeHEADERS \
+	install-pkgconfigDATA
 
 install-dvi: install-dvi-recursive
 
@@ -2385,7 +2418,7 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
-	uninstall-nobase_pkgincludeHEADERS
+	uninstall-nobase_pkgincludeHEADERS uninstall-pkgconfigDATA
 
 .MAKE: $(am__recursive_targets) all install-am install-strip
 
@@ -2402,12 +2435,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLTLIBRARIES install-man \
 	install-nobase_pkgincludeHEADERS install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES uninstall-nobase_pkgincludeHEADERS
+	install-pkgconfigDATA install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
+	uninstall-nobase_pkgincludeHEADERS uninstall-pkgconfigDATA
 
 .PRECIOUS: Makefile
 
