@@ -35,12 +35,7 @@ extern "C" {
 #include "vireo/error/error.h"
 
 CONSTRUCTOR static void _Init() {
-#ifdef TWITTER_INTERNAL
-  extern AVCodec ff_h264_decoder;
-  avcodec_register(&ff_h264_decoder);
-#else
   av_register_all();
-#endif
 }
 
 namespace vireo {

@@ -47,12 +47,7 @@ const static uint8_t kNaluLengthSize = 4;
 const static uint8_t kNumTracks = 4;
 
 CONSTRUCTOR static void _Init() {
-#ifdef TWITTER_INTERNAL
-  extern AVInputFormat ff_mpegts_demuxer;
-  av_register_input_format(&ff_mpegts_demuxer);
-#else
   av_register_all();
-#endif
 }
 
 namespace vireo {

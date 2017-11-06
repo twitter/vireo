@@ -40,12 +40,7 @@ extern "C" {
 #include "vireo/version.h"
 
 CONSTRUCTOR static void _Init() {
-#ifdef TWITTER_INTERNAL
-  extern AVOutputFormat ff_mpegts_muxer;
-  av_register_output_format(&ff_mpegts_muxer);
-#else
   av_register_all();
-#endif
 }
 
 const static uint8_t kNumTracks = 2;
