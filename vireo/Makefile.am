@@ -2,30 +2,19 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ../imagecore
 
 libvireo_la_CPPFLAGS = -I./ -I../ -I../thirdparty/l-smash_extra
-bin_PROGRAMS = frames
+bin_PROGRAMS = frames chunk frames stitch trim unchunk
+
+chunk_CPPFLAGS = -I../
+chunk_SOURCES = tools/chunk/main.cpp tests/test_common.cpp
+chunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 
 frames_CPPFLAGS = -I../
-frames_SOURCES = tools/frames/main.cpp  tests/test_common.cpp
+frames_SOURCES = tools/frames/main.cpp tests/test_common.cpp
 frames_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-
-if USE_LIBAVCODEC
-bin_PROGRAMS += remux trim stitch thumbnails transcode unchunk validate viddiff
-
-remux_CPPFLAGS = -I../
-remux_SOURCES = tools/remux/main.cpp  tests/test_common.cpp
-remux_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 
 stitch_CPPFLAGS = -I../
 stitch_SOURCES = tools/stitch/main.cpp tests/test_common.cpp
 stitch_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-
-thumbnails_CPPFLAGS = -I../
-thumbnails_SOURCES = tools/thumbnails/main.cpp tests/test_common.cpp
-thumbnails_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-
-transcode_CPPFLAGS = -I../
-transcode_SOURCES = tools/transcode/main.cpp tests/test_common.cpp
-transcode_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 
 trim_CPPFLAGS = -I../
 trim_SOURCES = tools/trim/main.cpp tests/test_common.cpp
@@ -34,6 +23,25 @@ trim_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 unchunk_CPPFLAGS = -I../
 unchunk_SOURCES = tools/unchunk/main.cpp tests/test_common.cpp
 unchunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+
+if USE_LIBAVCODEC
+bin_PROGRAMS += psnr remux thumbnails transcode validate viddiff
+
+psnr_CPPFLAGS = -I../
+psnr_SOURCES = tools/psnr/main.cpp tests/test_common.cpp
+psnr_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+
+remux_CPPFLAGS = -I../
+remux_SOURCES = tools/remux/main.cpp tests/test_common.cpp
+remux_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+
+thumbnails_CPPFLAGS = -I../
+thumbnails_SOURCES = tools/thumbnails/main.cpp tests/test_common.cpp
+thumbnails_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+
+transcode_CPPFLAGS = -I../
+transcode_SOURCES = tools/transcode/main.cpp tests/test_common.cpp
+transcode_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 
 validate_CPPFLAGS = -I../
 validate_SOURCES = tools/validate/main.cpp tests/test_common.cpp

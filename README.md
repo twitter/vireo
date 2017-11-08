@@ -1,6 +1,6 @@
 # Overview
 
-Vireo is a lightweight and versatile video processing library, written in C++-11 and built with functional programming principles. It also optionally comes with light Scala wrappers that enable easy video processing within a high-level functional language.
+Vireo is a lightweight and versatile video processing library, written in C++11 and built with functional programming principles. It also optionally comes with Scala wrappers that enable video processing within a high-level functional language.
 
 Vireo is built on top of best of class open source libraries, and defines a unified and modular interface for these libraries to communicate easily and efficiently. With this unified interface, it is easy to write new modules (e.g. new codec) or swap out the existing ones in favor of others (e.g. proprietary or hardware H.264 decoder).
 
@@ -18,12 +18,11 @@ Vireo conveniently ships with a few media processing tools that are built on top
 - **thumbnails**: extracts keyframes from the input video and saves them as JPG images
 - **transcode**: transcodes an input video into another video with different format (able to change resolution, crop, change bitrate, convert containers/codecs)
 - **trim**: trims the input video at desired time boundaries without transcoding the input video
+- **unchunk**: puts the chunks created by the **chunk** tool together into a single mp4 file
 - **validate**: checks if the video is valid and if so, supported by vireo
 - **viddiff**: checks if two video files are functionally identical or not (does not compare data that does not affect the playback behavior)
 
 # How to Build Vireo and Tools
-
-To build and use vireo simply execute:
 
 ```
     # within the main repository directory
@@ -84,7 +83,7 @@ The following libraries are automatically enabled if present in your system
 - [libvorbisenc](https://xiph.org/vorbis/doc/vorbisenc/index.html)
 - [libwebm](https://github.com/webmproject/libwebm)
 
-The following libraries are disabled by default. To enable GPL licensed components, `--enable-gpl` flag have to be explicitly passed to `configure` while building Vireo
+The following libraries are disabled by default. To enable GPL licensed components, they have to be present in your system and `--enable-gpl` flag have to be explicitly passed to `configure`
 
 - [libavformat](https://github.com/FFmpeg/FFmpeg)
 - [libavcodec](https://github.com/FFmpeg/FFmpeg)
@@ -151,13 +150,12 @@ To give you an idea on what you can build using Vireo, we provide 3 simple code 
       auto binary = muxer();
       // save to file
       util::save(out, binary);
-      cout << "Done" << endl;
     }
 ```
 
 ## Build a HelloWorld Application with Vireo
 
-You can built your own application simply by using `pkg-config`. Just make sure you add the Vireo install directory to your `PKG_CONFIG_PATH` if you did not install Vireo to a path where `pkg-config` is already looking at.
+You can build your own application simply by using `pkg-config`. Just make sure you add the Vireo install directory to your `PKG_CONFIG_PATH` if you did not install Vireo to a path where `pkg-config` is already looking at.
 
 To build the examples provided in [Code Examples](#code-examples) section, simply execute the following:
 
@@ -173,5 +171,5 @@ To build the examples provided in [Code Examples](#code-examples) section, simpl
 
 - Make sure you have a **detailed description** about the change in your commit.
 - **Prefer code readability** over fast development and premature performance optimizations.
-- **If you're making assumptions** (can happen due to lack of enough test data, confusing documentation in the standard, or you're simply not implementing a rare edge case in order to decrease code complexity and development cost), **make sure they are documented in code**. Both with a `THROW_IF(..., Unsupported, "reason")` (or `CHECK(...)`) and ideally in comments as well.
+- **If you're making assumptions** (can happen due to lack of enough test data, confusing documentation in the standards, or you're avoiding implementing a rare edge case in order to decrease code complexity and development cost), **make sure they are documented in code**. Both with a `THROW_IF(..., Unsupported, "reason")` (or `CHECK(...)`) and ideally in comments as well.
 - If there is any API or functionality change, make sure the affected tools (`remux`, `transcode` etc.) are also updated.

@@ -6365,141 +6365,6 @@ else
 fi
 
 ## Optional
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_init_packet in -lavcodec" >&5
-$as_echo_n "checking for av_init_packet in -lavcodec... " >&6; }
-if ${ac_cv_lib_avcodec_av_init_packet+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lavcodec  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char av_init_packet ();
-int
-main ()
-{
-return av_init_packet ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_avcodec_av_init_packet=yes
-else
-  ac_cv_lib_avcodec_av_init_packet=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avcodec_av_init_packet" >&5
-$as_echo "$ac_cv_lib_avcodec_av_init_packet" >&6; }
-if test "x$ac_cv_lib_avcodec_av_init_packet" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBAVCODEC 1
-_ACEOF
-
-  LIBS="-lavcodec $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_add_index_entry in -lavformat" >&5
-$as_echo_n "checking for av_add_index_entry in -lavformat... " >&6; }
-if ${ac_cv_lib_avformat_av_add_index_entry+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lavformat  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char av_add_index_entry ();
-int
-main ()
-{
-return av_add_index_entry ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_avformat_av_add_index_entry=yes
-else
-  ac_cv_lib_avformat_av_add_index_entry=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avformat_av_add_index_entry" >&5
-$as_echo "$ac_cv_lib_avformat_av_add_index_entry" >&6; }
-if test "x$ac_cv_lib_avformat_av_add_index_entry" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBAVFORMAT 1
-_ACEOF
-
-  LIBS="-lavformat $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_asprintf in -lavutil" >&5
-$as_echo_n "checking for av_asprintf in -lavutil... " >&6; }
-if ${ac_cv_lib_avutil_av_asprintf+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lavutil  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char av_asprintf ();
-int
-main ()
-{
-return av_asprintf ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_avutil_av_asprintf=yes
-else
-  ac_cv_lib_avutil_av_asprintf=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avutil_av_asprintf" >&5
-$as_echo "$ac_cv_lib_avutil_av_asprintf" >&6; }
-if test "x$ac_cv_lib_avutil_av_asprintf" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBAVUTIL 1
-_ACEOF
-
-  LIBS="-lavutil $LIBS"
-
-fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for aacDecoder_Open in -lfdk-aac" >&5
 $as_echo_n "checking for aacDecoder_Open in -lfdk-aac... " >&6; }
 if ${ac_cv_lib_fdk_aac_aacDecoder_Open+:} false; then :
@@ -6632,51 +6497,6 @@ if test "x$ac_cv_lib_pthread_pthread_create" = xyes; then :
 _ACEOF
 
   LIBS="-lpthread $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for swscale_version in -lswscale" >&5
-$as_echo_n "checking for swscale_version in -lswscale... " >&6; }
-if ${ac_cv_lib_swscale_swscale_version+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lswscale  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char swscale_version ();
-int
-main ()
-{
-return swscale_version ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_swscale_swscale_version=yes
-else
-  ac_cv_lib_swscale_swscale_version=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_swscale_swscale_version" >&5
-$as_echo "$ac_cv_lib_swscale_swscale_version" >&6; }
-if test "x$ac_cv_lib_swscale_swscale_version" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBSWSCALE 1
-_ACEOF
-
-  LIBS="-lswscale $LIBS"
 
 fi
 
@@ -6860,51 +6680,6 @@ _ACEOF
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for x264_free in -lx264" >&5
-$as_echo_n "checking for x264_free in -lx264... " >&6; }
-if ${ac_cv_lib_x264_x264_free+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lx264  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char x264_free ();
-int
-main ()
-{
-return x264_free ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_x264_x264_free=yes
-else
-  ac_cv_lib_x264_x264_free=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_x264_x264_free" >&5
-$as_echo "$ac_cv_lib_x264_x264_free" >&6; }
-if test "x$ac_cv_lib_x264_x264_free" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBX264 1
-_ACEOF
-
-  LIBS="-lx264 $LIBS"
-
-fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for deflate in -lz" >&5
 $as_echo_n "checking for deflate in -lz... " >&6; }
 if ${ac_cv_lib_z_deflate+:} false; then :
@@ -6950,6 +6725,267 @@ _ACEOF
 
 fi
 
+## Optional and if GPL enabled explicitly
+case "$enable_gpl" in #(
+  yes) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_init_packet in -lavcodec" >&5
+$as_echo_n "checking for av_init_packet in -lavcodec... " >&6; }
+if ${ac_cv_lib_avcodec_av_init_packet+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lavcodec  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char av_init_packet ();
+int
+main ()
+{
+return av_init_packet ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_avcodec_av_init_packet=yes
+else
+  ac_cv_lib_avcodec_av_init_packet=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avcodec_av_init_packet" >&5
+$as_echo "$ac_cv_lib_avcodec_av_init_packet" >&6; }
+if test "x$ac_cv_lib_avcodec_av_init_packet" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBAVCODEC 1
+_ACEOF
+
+  LIBS="-lavcodec $LIBS"
+
+fi
+ ;; #(
+  no) :
+     ;; #(
+  *) :
+     ;;
+esac
+case "$enable_gpl" in #(
+  yes) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_add_index_entry in -lavformat" >&5
+$as_echo_n "checking for av_add_index_entry in -lavformat... " >&6; }
+if ${ac_cv_lib_avformat_av_add_index_entry+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lavformat  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char av_add_index_entry ();
+int
+main ()
+{
+return av_add_index_entry ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_avformat_av_add_index_entry=yes
+else
+  ac_cv_lib_avformat_av_add_index_entry=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avformat_av_add_index_entry" >&5
+$as_echo "$ac_cv_lib_avformat_av_add_index_entry" >&6; }
+if test "x$ac_cv_lib_avformat_av_add_index_entry" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBAVFORMAT 1
+_ACEOF
+
+  LIBS="-lavformat $LIBS"
+
+fi
+ ;; #(
+  no) :
+     ;; #(
+  *) :
+     ;;
+esac
+case "$enable_gpl" in #(
+  yes) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for av_asprintf in -lavutil" >&5
+$as_echo_n "checking for av_asprintf in -lavutil... " >&6; }
+if ${ac_cv_lib_avutil_av_asprintf+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lavutil  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char av_asprintf ();
+int
+main ()
+{
+return av_asprintf ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_avutil_av_asprintf=yes
+else
+  ac_cv_lib_avutil_av_asprintf=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_avutil_av_asprintf" >&5
+$as_echo "$ac_cv_lib_avutil_av_asprintf" >&6; }
+if test "x$ac_cv_lib_avutil_av_asprintf" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBAVUTIL 1
+_ACEOF
+
+  LIBS="-lavutil $LIBS"
+
+fi
+ ;; #(
+  no) :
+     ;; #(
+  *) :
+     ;;
+esac
+case "$enable_gpl" in #(
+  yes) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for swscale_version in -lswscale" >&5
+$as_echo_n "checking for swscale_version in -lswscale... " >&6; }
+if ${ac_cv_lib_swscale_swscale_version+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lswscale  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char swscale_version ();
+int
+main ()
+{
+return swscale_version ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_swscale_swscale_version=yes
+else
+  ac_cv_lib_swscale_swscale_version=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_swscale_swscale_version" >&5
+$as_echo "$ac_cv_lib_swscale_swscale_version" >&6; }
+if test "x$ac_cv_lib_swscale_swscale_version" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSWSCALE 1
+_ACEOF
+
+  LIBS="-lswscale $LIBS"
+
+fi
+ ;; #(
+  no) :
+     ;; #(
+  *) :
+     ;;
+esac
+case "$enable_gpl" in #(
+  yes) :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for x264_free in -lx264" >&5
+$as_echo_n "checking for x264_free in -lx264... " >&6; }
+if ${ac_cv_lib_x264_x264_free+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lx264  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char x264_free ();
+int
+main ()
+{
+return x264_free ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_x264_x264_free=yes
+else
+  ac_cv_lib_x264_x264_free=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_x264_x264_free" >&5
+$as_echo "$ac_cv_lib_x264_x264_free" >&6; }
+if test "x$ac_cv_lib_x264_x264_free" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBX264 1
+_ACEOF
+
+  LIBS="-lx264 $LIBS"
+
+fi
+ ;; #(
+  no) :
+     ;; #(
+  *) :
+     ;;
+esac
 
 # Conditionals for Makefile.am
  if test `grep -c HAVE_LIBWEBM confdefs.h` -eq 1; then
@@ -6960,7 +6996,7 @@ else
   USE_LIBWEBM_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
+ if test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1; then
   USE_LIBAVCODEC_TRUE=
   USE_LIBAVCODEC_FALSE='#'
 else
@@ -6968,7 +7004,7 @@ else
   USE_LIBAVCODEC_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
+ if test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1; then
   USE_LIBAVFORMAT_TRUE=
   USE_LIBAVFORMAT_FALSE='#'
 else
@@ -6976,7 +7012,7 @@ else
   USE_LIBAVFORMAT_FALSE=
 fi
 
- if test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
+ if test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1; then
   USE_LIBAVUTIL_TRUE=
   USE_LIBAVUTIL_FALSE='#'
 else
@@ -7024,7 +7060,7 @@ else
   USE_LIBVPX_FALSE=
 fi
 
- if test `grep -c HAVE_LIBX264 confdefs.h` -eq 1 -a x${enable_gpl} = xyes; then
+ if test `grep -c HAVE_LIBX264 confdefs.h` -eq 1; then
   USE_LIBX264_TRUE=
   USE_LIBX264_FALSE='#'
 else

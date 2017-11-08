@@ -108,9 +108,8 @@ void print_usage(const string name) {
   cout << std::left << std::setw(opt_len) << "-qp_min:"           << std::left << std::setw(desc_len) << "minimum quantizer" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-keyint_max:"       << std::left << std::setw(desc_len) << "maximum interval between IDR-frames" << "(default: 1<<30)" << endl;
   cout << std::left << std::setw(opt_len) << "-keyint_min:"       << std::left << std::setw(desc_len) << "minimum interval between IDR-frames" << "(default: 0)" << endl;
-  cout << std::left << std::setw(opt_len) << "--b_rc_mbtree:"     << std::left << std::setw(desc_len) << "macroblock tree ratecontrol" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-stats_log_path:"   << std::left << std::setw(desc_len) << "input/output path for stats file" << "(default: \"\")" << endl;
-  cout << std::left << std::setw(opt_len) << "--rc_b_mb_tree:"    << std::left << std::setw(desc_len) << "enable mb_tree rate control" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "--rc_b_mb_tree:"    << std::left << std::setw(desc_len) << "enable macroblock tree rate control" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-pyramid_mode:"     << std::left << std::setw(desc_len) << "allow the use of B-frames as references for other frames" << "(none: 0, strcit: 1, normal: 2, default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-me_method:"        << std::left << std::setw(desc_len) << "motion estimation method" << "(DIA: 0, HEX: 1, UMH: 2, ESA: 3, TESA: 4, default: 1)" << endl;
   cout << std::left << std::setw(opt_len) << "-subpel_refine:"    << std::left << std::setw(desc_len) << "subpixel motion estimation quality" << "(default: 4)" << endl;

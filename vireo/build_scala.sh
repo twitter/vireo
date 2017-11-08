@@ -28,13 +28,13 @@ pushd ${VIREO_DIR}
 # read vireo version
 VERSION_NUMBER=`grep -E 'VIREO_VERSION \"(.*)\"' version.h | cut -d\" -f2`
 
-# change directory to scala directory
-cd scala/vireo-scala
-
 # replace VIREO_VERSION string in templates with actual version number and save
 TEMPLATES="pom.xml.template"
 COMMAND="cat {} | sed 's/VIREO_VERSION/${VERSION_NUMBER}/g' > \`dirname {}\`/\`basename {} .template\`"
 find . -name ${TEMPLATES} -exec sh -c "${COMMAND}" \;
+
+# change directory to scala directory
+cd scala/vireo-scala
 
 # build Scala wrappers
 mvn install

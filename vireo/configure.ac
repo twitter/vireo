@@ -54,31 +54,32 @@ AC_ARG_ENABLE([gpl],
 ## Required
 AC_CHECK_LIB([lsmash], [lsmash_free], [], [AC_MSG_ERROR(L-Smash is required. Instructions at https://github.com/twitter/vireo)])
 ## Optional
-AC_CHECK_LIB([avcodec], [av_init_packet])
-AC_CHECK_LIB([avformat], [av_add_index_entry])
-AC_CHECK_LIB([avutil], [av_asprintf])
 AC_CHECK_LIB([fdk-aac], [aacDecoder_Open])
 AC_CHECK_LIB([ogg], [ogg_packet_clear])
 AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([swscale], [swscale_version])
 AC_CHECK_LIB([vorbis], [vorbis_block_init])
 AC_CHECK_LIB([vorbisenc], [vorbis_encode_init])
 AC_CHECK_LIB([vpx], [vpx_free])
 AC_CHECK_LIB([webm], [_ZN8mkvmuxer10AudioTrackC1EPj])
-AC_CHECK_LIB([x264], [x264_free])
 AC_CHECK_LIB([z], [deflate])
+## Optional and if GPL enabled explicitly
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avcodec], [av_init_packet])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avformat], [av_add_index_entry])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avutil], [av_asprintf])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([swscale], [swscale_version])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([x264], [x264_free])], [no], [], [])
 
 # Conditionals for Makefile.am
 AM_CONDITIONAL([USE_LIBWEBM], [test `grep -c HAVE_LIBWEBM confdefs.h` -eq 1])
-AM_CONDITIONAL([USE_LIBAVCODEC], [test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1 -a x${enable_gpl} = xyes])
-AM_CONDITIONAL([USE_LIBAVFORMAT], [test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1 -a x${enable_gpl} = xyes])
-AM_CONDITIONAL([USE_LIBAVUTIL], [test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1 -a x${enable_gpl} = xyes])
+AM_CONDITIONAL([USE_LIBAVCODEC], [test `grep -c HAVE_LIBAVCODEC confdefs.h` -eq 1])
+AM_CONDITIONAL([USE_LIBAVFORMAT], [test `grep -c HAVE_LIBAVFORMAT confdefs.h` -eq 1])
+AM_CONDITIONAL([USE_LIBAVUTIL], [test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBFDK_AAC], [test `grep -c HAVE_LIBFDK_AAC confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBLSMASH], [test `grep -c HAVE_LIBLSMASH confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVORBIS], [test `grep -c HAVE_LIBVORBIS confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVORBISENC], [test `grep -c HAVE_LIBVORBISENC confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVPX], [test `grep -c HAVE_LIBVPX confdefs.h` -eq 1])
-AM_CONDITIONAL([USE_LIBX264], [test `grep -c HAVE_LIBX264 confdefs.h` -eq 1 -a x${enable_gpl} = xyes])
+AM_CONDITIONAL([USE_LIBX264], [test `grep -c HAVE_LIBX264 confdefs.h` -eq 1])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stddef.h stdlib.h string.h sys/param.h unistd.h])
