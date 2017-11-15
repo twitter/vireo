@@ -35,7 +35,7 @@ namespace decode {
 
 using namespace vireo::decode;
 
-class PUBLIC H264 final : public functional::DirectVideo<H264, frame::Frame> {
+class H264 final : public functional::DirectVideo<H264, frame::Frame> {
   std::shared_ptr<struct _H264> _this;
 public:
   H264(const functional::Video<Sample>& track, uint32_t thread_count = 0);

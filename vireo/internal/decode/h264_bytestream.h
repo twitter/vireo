@@ -33,7 +33,7 @@ namespace vireo {
 namespace internal {
 namespace decode {
 
-class PUBLIC H264_BYTESTREAM final : public functional::DirectVideo<H264_BYTESTREAM, std::function<RawSample(void)>> {
+class H264_BYTESTREAM final : public functional::DirectVideo<H264_BYTESTREAM, std::function<RawSample(void)>> {
   std::shared_ptr<struct _H264_BYTESTREAM> _this;
 public:
   H264_BYTESTREAM(common::Data32&& data);

@@ -31,7 +31,7 @@
 namespace vireo {
 namespace sound {
 
-class PCM {
+class PUBLIC PCM {
   struct _PCM* _this;
 public:
   PCM(uint16_t size, uint8_t channels, common::Sample16&& samples);

@@ -36,7 +36,7 @@ namespace decode {
 template <typename NalType> struct _AVCC;
 
 template <typename NalType>
-class PUBLIC AVCC final : public domain::Interval<AVCC<NalType>, NalInfo<NalType>, uint32_t> {
+class AVCC final : public domain::Interval<AVCC<NalType>, NalInfo<NalType>, uint32_t> {
   std::shared_ptr<_AVCC<NalType>> _this = nullptr;
 public:
   AVCC(const common::Data32& data, uint8_t nalu_length_size);

@@ -42,7 +42,7 @@ struct Settings {
 };
 
 template <>
-struct Settings<SampleType::Video> {
+struct PUBLIC Settings<SampleType::Video> {
   enum Codec {
     Unknown = 0,
     H264 = 1,
@@ -98,7 +98,7 @@ struct Settings<SampleType::Video> {
 };
 
 template <>
-struct Settings<SampleType::Audio> {
+struct PUBLIC Settings<SampleType::Audio> {
   enum Codec {
     Unknown = 0,
     AAC_Main = 1,
@@ -125,7 +125,7 @@ struct Settings<SampleType::Audio> {
 };
 
 template <>
-struct Settings<SampleType::Data> {
+struct PUBLIC Settings<SampleType::Data> {
   enum Codec {
     Unknown = 0,
     TimedID3 = 1,
@@ -138,7 +138,7 @@ struct Settings<SampleType::Data> {
 };
 
 template <>
-struct Settings<SampleType::Caption> {
+struct PUBLIC Settings<SampleType::Caption> {
   enum Codec {
     Unknown = 0
   };

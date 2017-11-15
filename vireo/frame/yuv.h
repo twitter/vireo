@@ -26,6 +26,7 @@
 
 #include "vireo/base_h.h"
 #include "vireo/common/data.h"
+#include "vireo/dependency.hpp"
 #include "vireo/domain/interval.hpp"
 #include "vireo/frame/plane.h"
 
@@ -52,6 +53,7 @@ public:
   auto plane(PlaneIndex index) const -> const Plane&;
 
   // Transforms
+  template <typename Available = has_swscale>
   auto rgb(uint8_t component_count) -> RGB;
   auto full_range(bool full_range) -> YUV;
   auto crop(uint16_t x_offset, uint16_t y_offset, uint16_t width, uint16_t height) const -> YUV;

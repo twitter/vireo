@@ -34,14 +34,14 @@ namespace vireo {
 namespace demux {
 
 class PUBLIC Movie final {
-  std::shared_ptr<struct _Movie> _this = NULL;
+  std::shared_ptr<struct _Movie> _this;
 public:
   Movie(common::Reader&& reader);
   Movie(Movie&& movie);
   DISALLOW_COPY_AND_ASSIGN(Movie);
   auto file_type() -> FileType;
 
-  class VideoTrack final : public functional::DirectVideo<VideoTrack, decode::Sample> {
+  class PUBLIC VideoTrack final : public functional::DirectVideo<VideoTrack, decode::Sample> {
     std::shared_ptr<_Movie> _this;
     VideoTrack(const std::shared_ptr<_Movie>& _this);
     friend class Movie;
@@ -54,7 +54,7 @@ public:
     auto operator()(const uint32_t index) const -> decode::Sample;
   } video_track;
 
-  class AudioTrack final : public functional::DirectAudio<AudioTrack, decode::Sample> {
+  class PUBLIC AudioTrack final : public functional::DirectAudio<AudioTrack, decode::Sample> {
     std::shared_ptr<_Movie> _this;
     AudioTrack(const std::shared_ptr<_Movie>& _this);
     friend class Movie;
@@ -66,7 +66,7 @@ public:
     auto operator()(const uint32_t index) const -> decode::Sample;
   } audio_track;
 
-  class DataTrack final : public functional::DirectData<DataTrack, decode::Sample> {
+  class PUBLIC DataTrack final : public functional::DirectData<DataTrack, decode::Sample> {
     std::shared_ptr<_Movie> _this;
     DataTrack(const std::shared_ptr<_Movie>& _this);
     friend class Movie;
@@ -76,7 +76,7 @@ public:
     auto operator()(const uint32_t index) const -> decode::Sample;
   } data_track;
 
-  class CaptionTrack final : public functional::DirectCaption<CaptionTrack, decode::Sample> {
+  class PUBLIC CaptionTrack final : public functional::DirectCaption<CaptionTrack, decode::Sample> {
     std::shared_ptr<_Movie> _this;
     CaptionTrack(const std::shared_ptr<_Movie>& _this);
     friend class Movie;

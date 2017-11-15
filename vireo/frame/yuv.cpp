@@ -24,10 +24,6 @@
 
 #include "imagecore/image/rgba.h"
 #include "imagecore/image/yuv.h"
-extern "C" {
-#include "libavutil/frame.h"
-#include "libswscale/swscale.h"
-}
 #include "vireo/base_cpp.h"
 #include "vireo/common/ref.h"
 #include "vireo/common/math.h"
@@ -118,46 +114,9 @@ auto YUV::plane(PlaneIndex index) const -> const Plane& {
   }
 }
 
-auto YUV::rgb(uint8_t component_count) -> RGB {
-  THROW_IF(component_count < 3 || component_count > 4, InvalidArguments);
-  frame::RGB rgb(width(), height(), component_count);
-  uint8_t* const src[] = {
-    (uint8_t* const)plane(frame::Y).bytes().data(),
-    (uint8_t* const)plane(frame::U).bytes().data(),
-    (uint8_t* const)plane(frame::V).bytes().data()
-  };
-  const int src_stride[] = {
-    plane(frame::Y).row(),
-    plane(frame::U).row(),
-    plane(frame::V).row()
-  };
-  uint8_t* const dst[] = { (uint8_t* const)rgb.plane().bytes().data() };
-  const int dst_stride[] = { rgb.plane().row() };
-  AVPixelFormat src_format = AV_PIX_FMT_NONE;
-  if (uv_ratio().first == 2 && uv_ratio().second == 2) {
-    src_format = AV_PIX_FMT_YUV420P;
-  } else if (uv_ratio().first == 2 && uv_ratio().second == 1) {
-    src_format = AV_PIX_FMT_YUV422P;
-  }
-  CHECK(src_format != AV_PIX_FMT_NONE);
-  AVPixelFormat dst_format = AV_PIX_FMT_NONE;
-  if (component_count == 3) {
-    dst_format = AV_PIX_FMT_RGB24;
-  } else if (component_count == 4) {
-    dst_format = AV_PIX_FMT_RGBA;
-  }
-  CHECK(dst_format != AV_PIX_FMT_NONE);
-  struct SwsContext* img_convert_ctx = sws_getContext(width(), height(), src_format, width(), height(),
-                                                      dst_format, SWS_LANCZOS, NULL, NULL, NULL);
-  if (full_range()) {
-    sws_setColorspaceDetails(img_convert_ctx, sws_getCoefficients(SWS_CS_DEFAULT), AVCOL_RANGE_JPEG,
-                             sws_getCoefficients(SWS_CS_DEFAULT), AVCOL_RANGE_UNSPECIFIED,
-                             0, 1 << 16, 1 << 16);
-  }
-  CHECK(img_convert_ctx);
-  sws_scale(img_convert_ctx, src, src_stride, 0, height(), dst, dst_stride);
-  sws_freeContext(img_convert_ctx);
-  return rgb;
+template <>
+auto YUV::rgb<std::false_type>(uint8_t component_count) -> RGB {
+  THROW_IF(true, MissingDependency);
 }
 
 auto YUV::full_range(bool full_range) -> YUV {

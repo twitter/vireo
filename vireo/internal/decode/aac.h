@@ -35,7 +35,7 @@ namespace decode {
 
 using namespace vireo::decode;
 
-class PUBLIC AAC final : public functional::DirectAudio<AAC, sound::Sound> {
+class AAC final : public functional::DirectAudio<AAC, sound::Sound> {
   std::shared_ptr<struct _AAC> _this;
 public:
   AAC(const functional::Audio<Sample>& track);

@@ -25,6 +25,7 @@
 #include "vireo/base_cpp.h"
 #include "vireo/constants.h"
 #include "vireo/common/security.h"
+#include "vireo/dependency.hpp"
 #include "vireo/error/error.h"
 #include "vireo/settings/settings.h"
 
@@ -84,6 +85,17 @@ auto Caption::operator!=(const Caption& settings) const -> bool {
   return !(*this == settings);
 }
 
+#if !defined(ANDROID) && !defined(IOS)
+template <typename Audio::Codec codec, typename std::enable_if<codec == Audio::Codec::Vorbis && has_audio_decoder<Audio::Codec::Vorbis>::value>::type* = nullptr>
+static auto as_extradata_private(settings::Audio& audio_settings) -> common::Data16 {
+  return webm_export_vorbis_codec_private(audio_settings);
+}
+template <typename Audio::Codec codec, typename std::enable_if<codec == Audio::Codec::Vorbis && !has_audio_decoder<Audio::Codec::Vorbis>::value>::type* = nullptr>
+static auto as_extradata_private(settings::Audio& audio_settings) -> common::Data16 {
+  THROW_IF(true, MissingDependency);
+}
+#endif
+
 auto Audio::as_extradata(ExtraDataType type) const -> common::Data16 {
   THROW_IF(type == adts, InvalidArguments);
 #if defined(ANDROID) || defined(IOS)
@@ -104,7 +116,7 @@ auto Audio::as_extradata(ExtraDataType type) const -> common::Data16 {
 #if !defined(ANDROID) && !defined(IOS)
   } else if (type == vorbis) {
     settings::Audio audio_settings = { codec, timescale, sample_rate, channels, bitrate };
-    return webm_export_vorbis_codec_private(audio_settings);
+    return as_extradata_private<settings::Audio::Vorbis>(audio_settings);
 #endif
   } else {
     return common::Data16();

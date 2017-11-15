@@ -88,63 +88,67 @@ struct _Movie {
   Track<SampleType::Audio> audio;
   Track<SampleType::Data> data;
   Track<SampleType::Caption> caption;
-  template <FileType Ftyp, typename Supported = typename has_dependency<Ftyp>::type>
+
+  template <FileType Ftyp, typename std::enable_if<Ftyp == FileType::MP4>::type* = nullptr>
+  void parse(common::Reader&& reader) {
+    file_type = FileType::MP4;
+    mp4_decoder.reset(new internal::demux::MP4(move(reader)));
+    video.track = functional::Video<decode::Sample>(mp4_decoder->video_track);
+    video.duration = mp4_decoder->video_track.duration();
+    video.edit_boxes.insert(video.edit_boxes.end(),
+                            mp4_decoder->video_track.edit_boxes().begin(),
+                            mp4_decoder->video_track.edit_boxes().end());
+    audio.track = functional::Audio<decode::Sample>(mp4_decoder->audio_track);
+    audio.duration = mp4_decoder->audio_track.duration();
+    audio.edit_boxes.insert(audio.edit_boxes.end(),
+                            mp4_decoder->audio_track.edit_boxes().begin(),
+                            mp4_decoder->audio_track.edit_boxes().end());
+    caption.track = functional::Caption<decode::Sample>(mp4_decoder->caption_track);
+    caption.duration = mp4_decoder->caption_track.duration();
+    caption.edit_boxes.insert(caption.edit_boxes.end(),
+                              mp4_decoder->caption_track.edit_boxes().begin(),
+                              mp4_decoder->caption_track.edit_boxes().end());
+  }
+
+  template<FileType Ftyp, typename std::enable_if<Ftyp == FileType::MP2TS && has_demuxer<Ftyp>::value>::type* = nullptr>
+  void parse(common::Reader&& reader) {
+    file_type = FileType::MP2TS;
+    mp2ts_decoder.reset(new internal::demux::MP2TS(move(reader)));
+    video.track = functional::Video<decode::Sample>(mp2ts_decoder->video_track);
+    video.duration = mp2ts_decoder->video_track.duration();
+    audio.track = functional::Audio<decode::Sample>(mp2ts_decoder->audio_track);
+    audio.duration = mp2ts_decoder->audio_track.duration();
+    data.track = functional::Data<decode::Sample>(mp2ts_decoder->data_track);
+    caption.track = functional::Caption<decode::Sample>(mp2ts_decoder->caption_track);
+    caption.duration = mp2ts_decoder->caption_track.duration();
+  }
+  template <FileType Ftyp, typename std::enable_if<Ftyp == FileType::MP2TS && !has_demuxer<Ftyp>::value>::type* = nullptr>
   void parse(common::Reader&& reader) {
     THROW_IF(true, MissingDependency);
   }
+
+  template<FileType Ftyp, typename std::enable_if<Ftyp == FileType::WebM && has_demuxer<Ftyp>::value>::type* = nullptr>
+  void parse(common::Reader&& reader) {
+    file_type = FileType::WebM;
+    webm_decoder.reset(new internal::demux::WebM(move(reader)));
+    video.track = functional::Video<decode::Sample>(webm_decoder->video_track);
+    video.duration = webm_decoder->video_track.duration();
+    audio.track = functional::Audio<decode::Sample>(webm_decoder->audio_track);
+    audio.duration = webm_decoder->audio_track.duration();
+  }
+  template <FileType Ftyp, typename std::enable_if<Ftyp == FileType::WebM && !has_demuxer<Ftyp>::value>::type* = nullptr>
+  void parse(common::Reader&& reader) {
+    THROW_IF(true, MissingDependency);
+  }
+
+  template<FileType Ftyp, typename std::enable_if<Ftyp == FileType::Image && has_demuxer<Ftyp>::value>::type* = nullptr>
+  void parse(common::Reader&& reader) {
+    file_type = FileType::Image;
+    image_decoder.reset(new internal::demux::Image(move(reader)));
+    video.track = functional::Video<decode::Sample>(image_decoder->track);
+    video.duration = image_decoder->track.duration();
+  }
 };
-
-template<>
-void _Movie::parse<FileType::MP4, std::true_type>(common::Reader&& reader) {
-  file_type = FileType::MP4;
-  mp4_decoder.reset(new internal::demux::MP4(move(reader)));
-  video.track = functional::Video<decode::Sample>(mp4_decoder->video_track);
-  video.duration = mp4_decoder->video_track.duration();
-  video.edit_boxes.insert(video.edit_boxes.end(),
-                          mp4_decoder->video_track.edit_boxes().begin(),
-                          mp4_decoder->video_track.edit_boxes().end());
-  audio.track = functional::Audio<decode::Sample>(mp4_decoder->audio_track);
-  audio.duration = mp4_decoder->audio_track.duration();
-  audio.edit_boxes.insert(audio.edit_boxes.end(),
-                          mp4_decoder->audio_track.edit_boxes().begin(),
-                          mp4_decoder->audio_track.edit_boxes().end());
-  caption.track = functional::Caption<decode::Sample>(mp4_decoder->caption_track);
-  caption.duration = mp4_decoder->caption_track.duration();
-  caption.edit_boxes.insert(caption.edit_boxes.end(),
-                            mp4_decoder->caption_track.edit_boxes().begin(),
-                            mp4_decoder->caption_track.edit_boxes().end());
-}
-
-template<>
-void _Movie::parse<FileType::MP2TS, std::true_type>(common::Reader&& reader) {
-  file_type = FileType::MP2TS;
-  mp2ts_decoder.reset(new internal::demux::MP2TS(move(reader)));
-  video.track = functional::Video<decode::Sample>(mp2ts_decoder->video_track);
-  video.duration = mp2ts_decoder->video_track.duration();
-  audio.track = functional::Audio<decode::Sample>(mp2ts_decoder->audio_track);
-  audio.duration = mp2ts_decoder->audio_track.duration();
-  data.track = functional::Data<decode::Sample>(mp2ts_decoder->data_track);
-  caption.track = functional::Caption<decode::Sample>(mp2ts_decoder->caption_track);
-  caption.duration = mp2ts_decoder->caption_track.duration();
-}
-
-template<>
-void _Movie::parse<FileType::WebM, std::true_type>(common::Reader&& reader) {
-  file_type = FileType::WebM;
-  webm_decoder.reset(new internal::demux::WebM(move(reader)));
-  video.track = functional::Video<decode::Sample>(webm_decoder->video_track);
-  video.duration = webm_decoder->video_track.duration();
-  audio.track = functional::Audio<decode::Sample>(webm_decoder->audio_track);
-  audio.duration = webm_decoder->audio_track.duration();
-}
-
-template<>
-void _Movie::parse<FileType::Image, std::true_type>(common::Reader&& reader) {
-  file_type = FileType::Image;
-  image_decoder.reset(new internal::demux::Image(move(reader)));
-  video.track = functional::Video<decode::Sample>(image_decoder->track);
-  video.duration = image_decoder->track.duration();
-}
 
 Movie::Movie(common::Reader&& reader) : _this(make_shared<_Movie>()), audio_track(_this), video_track(_this), data_track(_this), caption_track(_this) {
   vector<vector<uint8_t>> supported_ftyps = { internal::demux::kWebMFtyp, internal::demux::kMP2TSFtyp };

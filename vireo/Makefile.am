@@ -58,12 +58,24 @@ libvireo_la_SOURCES += common/bitreader.cpp common/data.cpp common/editbox.cpp c
 libvireo_la_SOURCES += decode/audio.cpp decode/video.cpp
 libvireo_la_SOURCES += demux/movie.cpp
 libvireo_la_SOURCES += encode/jpg.cpp encode/png.cpp
+libvireo_la_SOURCES += error/error.cpp
+libvireo_la_SOURCES += frame/frame.cpp frame/plane.cpp frame/rgb.cpp frame/util.cpp frame/yuv.cpp
+libvireo_la_SOURCES += header/header.cpp
+libvireo_la_SOURCES += internal/decode/annexb.cpp internal/decode/avcc.cpp internal/decode/h264_bytestream.cpp internal/decode/image.cpp internal/decode/pcm.cpp
+libvireo_la_SOURCES += internal/demux/image.cpp internal/demux/mp4.cpp
+libvireo_la_SOURCES += mux/mp4.cpp
+libvireo_la_SOURCES += util/caption.cpp util/ftyp.cpp util/timer.cpp
+libvireo_la_SOURCES += transform/stitch.cpp transform/trim.cpp
+libvireo_la_SOURCES += settings/settings.cpp
+libvireo_la_SOURCES += sound/pcm.cpp sound/sound.cpp
 if USE_LIBAVCODEC
 libvireo_la_SOURCES += internal/decode/h264.cpp
-libvireo_la_SOURCES += frame/frame.cpp frame/plane.cpp frame/rgb.cpp frame/util.cpp frame/yuv.cpp
 endif
 if USE_LIBAVFORMAT
 libvireo_la_SOURCES += internal/demux/mp2ts.cpp mux/mp2ts.cpp
+endif
+if USE_LIBSWSCALE
+libvireo_la_SOURCES += frame/rgb-swscale.cpp frame/yuv-swscale.cpp
 endif
 if USE_LIBFDK_AAC
 libvireo_la_SOURCES += internal/decode/aac.cpp encode/aac.cpp
@@ -80,15 +92,7 @@ endif
 if USE_LIBX264
 libvireo_la_SOURCES += encode/h264.cpp
 endif
-libvireo_la_SOURCES += error/error.cpp
-libvireo_la_SOURCES += header/header.cpp
-libvireo_la_SOURCES += internal/decode/annexb.cpp internal/decode/avcc.cpp internal/decode/h264_bytestream.cpp internal/decode/image.cpp internal/decode/pcm.cpp
-libvireo_la_SOURCES += internal/demux/image.cpp internal/demux/mp4.cpp
-libvireo_la_SOURCES += mux/mp4.cpp
-libvireo_la_SOURCES += util/caption.cpp util/ftyp.cpp util/timer.cpp
-libvireo_la_SOURCES += transform/stitch.cpp transform/trim.cpp
-libvireo_la_SOURCES += settings/settings.cpp
-libvireo_la_SOURCES += sound/pcm.cpp sound/sound.cpp
+
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
 

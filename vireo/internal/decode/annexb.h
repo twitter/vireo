@@ -36,7 +36,7 @@ namespace decode {
 template <typename NalType> struct _ANNEXB;
 
 template <typename NalType>
-class PUBLIC ANNEXB final : public domain::Interval<ANNEXB<NalType>, NalInfo<NalType>, uint32_t> {
+class ANNEXB final : public domain::Interval<ANNEXB<NalType>, NalInfo<NalType>, uint32_t> {
   std::shared_ptr<_ANNEXB<NalType>> _this = nullptr;
 public:
   ANNEXB(const common::Data32& data);

@@ -668,6 +668,8 @@ USE_LIBVORBISENC_FALSE
 USE_LIBVORBISENC_TRUE
 USE_LIBVORBIS_FALSE
 USE_LIBVORBIS_TRUE
+USE_LIBSWSCALE_FALSE
+USE_LIBSWSCALE_TRUE
 USE_LIBLSMASH_FALSE
 USE_LIBLSMASH_TRUE
 USE_LIBFDK_AAC_FALSE
@@ -6038,6 +6040,43 @@ $as_echo "#define HAVE_CXX14 1" >>confdefs.h
 
 
 
+# Compile flags
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -fvisibility=hidden" >&5
+$as_echo_n "checking whether C++ compiler accepts -fvisibility=hidden... " >&6; }
+if ${ax_cv_check_cxxflags___fvisibility_hidden+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -fvisibility=hidden"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_check_cxxflags___fvisibility_hidden=yes
+else
+  ax_cv_check_cxxflags___fvisibility_hidden=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___fvisibility_hidden" >&5
+$as_echo "$ax_cv_check_cxxflags___fvisibility_hidden" >&6; }
+if test "x$ax_cv_check_cxxflags___fvisibility_hidden" = xyes; then :
+  CXXFLAGS="${CXXFLAGS} -fvisibility=hidden -fvisibility-inlines-hidden"
+else
+  as_fn_error $? "Cannot set default visibility. Please use another compiler." "$LINENO" 5
+fi
+
+
 # Handles java/scala
 # Check whether --enable-scala was given.
 if test "${enable_scala+set}" = set; then :
@@ -7034,6 +7073,14 @@ fi
 else
   USE_LIBLSMASH_TRUE='#'
   USE_LIBLSMASH_FALSE=
+fi
+
+ if test `grep -c HAVE_LIBSWSCALE confdefs.h` -eq 1; then
+  USE_LIBSWSCALE_TRUE=
+  USE_LIBSWSCALE_FALSE='#'
+else
+  USE_LIBSWSCALE_TRUE='#'
+  USE_LIBSWSCALE_FALSE=
 fi
 
  if test `grep -c HAVE_LIBVORBIS confdefs.h` -eq 1; then
@@ -19056,6 +19103,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_LIBLSMASH_TRUE}" && test -z "${USE_LIBLSMASH_FALSE}"; then
   as_fn_error $? "conditional \"USE_LIBLSMASH\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_LIBSWSCALE_TRUE}" && test -z "${USE_LIBSWSCALE_FALSE}"; then
+  as_fn_error $? "conditional \"USE_LIBSWSCALE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_LIBVORBIS_TRUE}" && test -z "${USE_LIBVORBIS_FALSE}"; then

@@ -24,13 +24,13 @@ Vireo conveniently ships with a few media processing tools that are built on top
 
 # How to Build Vireo and Tools
 
-```
-    # within the main repository directory
-    $ cd vireo
-    $ export PREFIX=/path/to/install/dir
-    $ ./configure --prefix=$PREFIX
-    $ make
-    $ make install
+```bash
+# within the main repository directory
+$ cd vireo
+$ export PREFIX=/path/to/install/dir
+$ ./configure --prefix=$PREFIX
+$ make
+$ make install
 ```
 
 Once built, you can find
@@ -41,7 +41,7 @@ Once built, you can find
 
 To run a tool and see their usage, simply execute:
 
-```
+```bash
 $ $PREFIX/bin/<tool_name>
 ```
 
@@ -51,10 +51,10 @@ Please note that some of the tools listed in [List of Tools](#list-of-tools) may
 
 When compiling you can also optionally turn on C++ to Scala bindings by passing `--enable-scala` flag to `configure`. After you successfully build Vireo with these bindings, you can build the Scala wrappers by executing:
 
-```
-    # within the main repository directory
-    $ cd vireo
-    $ ./build_scala.sh
+```bash
+# within the main repository directory
+$ cd vireo
+$ ./build_scala.sh
 ```
 
 This will place the built jar file under `$PREFIX/lib`.
@@ -102,55 +102,55 @@ This installer allows you to select various third-party, pre-installed component
 To give you an idea on what you can build using Vireo, we provide 3 simple code snippets below.
 
 1. Remuxing an input file to mp4
-```
-    /*
-     * This function works without GPL dependencies
-     */
-    void remux(string in, string out) {
-      // setup the demux -> mux pipeline
-      demux::Movie movie(in);
-      mux::MP4 muxer(movie.video_track);
-      // nothing is executed until muxer() is called
-      auto binary = muxer();
-      // save to file
-      util::save(out, binary);
-    }
+```c++
+/*
+ * This function works without GPL dependencies
+ */
+void remux(string in, string out) {
+  // setup the demux -> mux pipeline
+  demux::Movie movie(in);
+  mux::MP4 muxer(movie.video_track);
+  // nothing is executed until muxer() is called
+  auto binary = muxer();
+  // save to file
+  util::save(out, binary);
+}
 ```
 
 2. Remuxing keyframes of an input file to mp4
-```
-    /*
-     * This function works without GPL dependencies
-     */
-    void keyframes(string in, string out) {
-      demux::Movie movie(in);
-      // extract keyframes using .filter operator
-      auto keyframes = movie.video_track.filter([](decode::Sample& sample) {
-        return sample.keyframe;
-      });
-      mux::MP4 muxer(keyframes);
-      // nothing is executed until muxer() is called
-      auto binary = muxer();
-      util::save(out, binary);
-    }
+```c++
+/*
+ * This function works without GPL dependencies
+ */
+void keyframes(string in, string out) {
+  demux::Movie movie(in);
+  // extract keyframes using .filter operator
+  auto keyframes = movie.video_track.filter([](decode::Sample& sample) {
+    return sample.keyframe;
+  });
+  mux::MP4 muxer(keyframes);
+  // nothing is executed until muxer() is called
+  auto binary = muxer();
+  util::save(out, binary);
+}
 ```
 
 3. Transcoding an input file to mp4
-```
-    /*
-     * This function requires vireo to be built with --enable-gpl flag
-     */
-    void transcode(string in, string out) {
-      // setup the demux -> decode -> encode -> mux pipeline
-      demux::Movie movie(in);
-      decode::Video decoder(movie.video_track);
-      encode::H264 encoder(decoder, 30.0f, 3, movie.video_track.fps());
-      mux::MP4 muxer(encoder);
-      // nothing is executed until muxer() is called
-      auto binary = muxer();
-      // save to file
-      util::save(out, binary);
-    }
+```c++
+/*
+ * This function requires vireo to be built with --enable-gpl flag
+ */
+void transcode(string in, string out) {
+  // setup the demux -> decode -> encode -> mux pipeline
+  demux::Movie movie(in);
+  decode::Video decoder(movie.video_track);
+  encode::H264 encoder(decoder, 30.0f, 3, movie.video_track.fps());
+  mux::MP4 muxer(encoder);
+  // nothing is executed until muxer() is called
+  auto binary = muxer();
+  // save to file
+  util::save(out, binary);
+}
 ```
 
 ## Build a HelloWorld Application with Vireo
@@ -159,12 +159,12 @@ You can build your own application simply by using `pkg-config`. Just make sure 
 
 To build the examples provided in [Code Examples](#code-examples) section, simply execute the following:
 
-```
-    # within the main repository directory
-    $ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-    $ cd vireo/helloworld
-    $ g++ `pkg-config --cflags --libs vireo` -std=c++14 -o helloworld helloworld.cpp
-    $ ./helloworld
+```bash
+# within the main repository directory
+$ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+$ cd vireo/helloworld
+$ g++ `pkg-config --cflags --libs vireo` -std=c++14 -o helloworld helloworld.cpp
+$ ./helloworld
 ```
 
 # Guidelines for Contributors

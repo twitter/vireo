@@ -36,7 +36,7 @@ namespace common {
 
 using namespace std;
 
-struct EditBox {
+struct PUBLIC EditBox {
   int64_t start_pts;
   uint64_t duration_pts;
   float rate;

@@ -47,7 +47,7 @@
 #define letoh64(x) OSSwapLittleToHostInt64(x)
 #else
 #include <endian.h>
-#ifdef __USE_BSD
+#if defined(__USE_BSD) || defined(__USE_GNU)
 /* Conversion interfaces.  */
 #include <byteswap.h>
 
@@ -132,5 +132,5 @@
 #endif
 
 #endif /* __BYTE_ORDER == __LITTLE_ENDIAN */
-#endif /* __USE_BSD */
+#endif /* __USE_BSD || __USE_GNU */
 #endif /* __APPLE__ */

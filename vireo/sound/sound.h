@@ -31,7 +31,7 @@
 namespace vireo {
 namespace sound {
 
-struct Sound {
+struct PUBLIC Sound {
   int64_t pts;
   std::function<PCM(void)> pcm;
   auto shift_pts(const int64_t offset) const -> Sound;

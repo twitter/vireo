@@ -94,17 +94,15 @@ host_triplet = @host@
 bin_PROGRAMS = frames$(EXEEXT) chunk$(EXEEXT) frames$(EXEEXT) \
 	stitch$(EXEEXT) trim$(EXEEXT) unchunk$(EXEEXT) $(am__EXEEXT_1)
 @USE_LIBAVCODEC_TRUE@am__append_1 = psnr remux thumbnails transcode validate viddiff
-@USE_LIBAVCODEC_TRUE@am__append_2 = internal/decode/h264.cpp \
-@USE_LIBAVCODEC_TRUE@	frame/frame.cpp frame/plane.cpp \
-@USE_LIBAVCODEC_TRUE@	frame/rgb.cpp frame/util.cpp \
-@USE_LIBAVCODEC_TRUE@	frame/yuv.cpp
+@USE_LIBAVCODEC_TRUE@am__append_2 = internal/decode/h264.cpp
 @USE_LIBAVFORMAT_TRUE@am__append_3 = internal/demux/mp2ts.cpp mux/mp2ts.cpp
-@USE_LIBFDK_AAC_TRUE@am__append_4 = internal/decode/aac.cpp encode/aac.cpp
-@USE_LIBVORBISENC_TRUE@am__append_5 = encode/vorbis.cpp settings/settings-vorbis.cpp
-@USE_LIBVPX_TRUE@am__append_6 = encode/vp8.cpp
-@USE_LIBWEBM_TRUE@am__append_7 = internal/demux/webm.cpp mux/webm.cpp
-@USE_LIBX264_TRUE@am__append_8 = encode/h264.cpp
-@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__append_9 = scala/jni/common/jni.cpp \
+@USE_LIBSWSCALE_TRUE@am__append_4 = frame/rgb-swscale.cpp frame/yuv-swscale.cpp
+@USE_LIBFDK_AAC_TRUE@am__append_5 = internal/decode/aac.cpp encode/aac.cpp
+@USE_LIBVORBISENC_TRUE@am__append_6 = encode/vorbis.cpp settings/settings-vorbis.cpp
+@USE_LIBVPX_TRUE@am__append_7 = encode/vp8.cpp
+@USE_LIBWEBM_TRUE@am__append_8 = internal/demux/webm.cpp mux/webm.cpp
+@USE_LIBX264_TRUE@am__append_9 = encode/h264.cpp
+@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__append_10 = scala/jni/common/jni.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/decode.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/encode.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/demux.cpp \
@@ -113,7 +111,7 @@ bin_PROGRAMS = frames$(EXEEXT) chunk$(EXEEXT) frames$(EXEEXT) \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/sound.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/transform.cpp \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/util.cpp
-@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__append_10 = $(JNI_CPPFLAGS)
+@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__append_11 = $(JNI_CPPFLAGS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../m4/libtool.m4 \
@@ -121,6 +119,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../m4/libtool.m4 \
 	$(top_srcdir)/../m4/ltsugar.m4 \
 	$(top_srcdir)/../m4/ltversion.m4 \
 	$(top_srcdir)/../m4/lt~obsolete.m4 \
+	$(top_srcdir)/../m4/m4-ax_check_compile_flag.m4 \
 	$(top_srcdir)/../m4/m4_ax_check_java_home.m4 \
 	$(top_srcdir)/../m4/m4_ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/../m4/m4_ax_cxx_compile_stdcxx_14.m4 \
@@ -171,44 +170,42 @@ libvireo_la_DEPENDENCIES = ../imagecore/libimagecore.la
 am__libvireo_la_SOURCES_DIST = common/bitreader.cpp common/data.cpp \
 	common/editbox.cpp common/path.cpp common/reader.cpp \
 	decode/audio.cpp decode/video.cpp demux/movie.cpp \
-	encode/jpg.cpp encode/png.cpp internal/decode/h264.cpp \
-	frame/frame.cpp frame/plane.cpp frame/rgb.cpp frame/util.cpp \
-	frame/yuv.cpp internal/demux/mp2ts.cpp mux/mp2ts.cpp \
-	internal/decode/aac.cpp encode/aac.cpp encode/vorbis.cpp \
-	settings/settings-vorbis.cpp encode/vp8.cpp \
-	internal/demux/webm.cpp mux/webm.cpp encode/h264.cpp \
-	error/error.cpp header/header.cpp internal/decode/annexb.cpp \
+	encode/jpg.cpp encode/png.cpp error/error.cpp frame/frame.cpp \
+	frame/plane.cpp frame/rgb.cpp frame/util.cpp frame/yuv.cpp \
+	header/header.cpp internal/decode/annexb.cpp \
 	internal/decode/avcc.cpp internal/decode/h264_bytestream.cpp \
 	internal/decode/image.cpp internal/decode/pcm.cpp \
 	internal/demux/image.cpp internal/demux/mp4.cpp mux/mp4.cpp \
 	util/caption.cpp util/ftyp.cpp util/timer.cpp \
 	transform/stitch.cpp transform/trim.cpp settings/settings.cpp \
-	sound/pcm.cpp sound/sound.cpp scala/jni/common/jni.cpp \
-	scala/jni/vireo/decode.cpp scala/jni/vireo/encode.cpp \
-	scala/jni/vireo/demux.cpp scala/jni/vireo/frame.cpp \
-	scala/jni/vireo/mux.cpp scala/jni/vireo/sound.cpp \
-	scala/jni/vireo/transform.cpp scala/jni/vireo/util.cpp
+	sound/pcm.cpp sound/sound.cpp internal/decode/h264.cpp \
+	internal/demux/mp2ts.cpp mux/mp2ts.cpp frame/rgb-swscale.cpp \
+	frame/yuv-swscale.cpp internal/decode/aac.cpp encode/aac.cpp \
+	encode/vorbis.cpp settings/settings-vorbis.cpp encode/vp8.cpp \
+	internal/demux/webm.cpp mux/webm.cpp encode/h264.cpp \
+	scala/jni/common/jni.cpp scala/jni/vireo/decode.cpp \
+	scala/jni/vireo/encode.cpp scala/jni/vireo/demux.cpp \
+	scala/jni/vireo/frame.cpp scala/jni/vireo/mux.cpp \
+	scala/jni/vireo/sound.cpp scala/jni/vireo/transform.cpp \
+	scala/jni/vireo/util.cpp
 am__dirstamp = $(am__leading_dot)dirstamp
 @USE_LIBAVCODEC_TRUE@am__objects_1 =  \
-@USE_LIBAVCODEC_TRUE@	internal/decode/libvireo_la-h264.lo \
-@USE_LIBAVCODEC_TRUE@	frame/libvireo_la-frame.lo \
-@USE_LIBAVCODEC_TRUE@	frame/libvireo_la-plane.lo \
-@USE_LIBAVCODEC_TRUE@	frame/libvireo_la-rgb.lo \
-@USE_LIBAVCODEC_TRUE@	frame/libvireo_la-util.lo \
-@USE_LIBAVCODEC_TRUE@	frame/libvireo_la-yuv.lo
+@USE_LIBAVCODEC_TRUE@	internal/decode/libvireo_la-h264.lo
 @USE_LIBAVFORMAT_TRUE@am__objects_2 =  \
 @USE_LIBAVFORMAT_TRUE@	internal/demux/libvireo_la-mp2ts.lo \
 @USE_LIBAVFORMAT_TRUE@	mux/libvireo_la-mp2ts.lo
-@USE_LIBFDK_AAC_TRUE@am__objects_3 =  \
+@USE_LIBSWSCALE_TRUE@am__objects_3 = frame/libvireo_la-rgb-swscale.lo \
+@USE_LIBSWSCALE_TRUE@	frame/libvireo_la-yuv-swscale.lo
+@USE_LIBFDK_AAC_TRUE@am__objects_4 =  \
 @USE_LIBFDK_AAC_TRUE@	internal/decode/libvireo_la-aac.lo \
 @USE_LIBFDK_AAC_TRUE@	encode/libvireo_la-aac.lo
-@USE_LIBVORBISENC_TRUE@am__objects_4 = encode/libvireo_la-vorbis.lo \
+@USE_LIBVORBISENC_TRUE@am__objects_5 = encode/libvireo_la-vorbis.lo \
 @USE_LIBVORBISENC_TRUE@	settings/libvireo_la-settings-vorbis.lo
-@USE_LIBVPX_TRUE@am__objects_5 = encode/libvireo_la-vp8.lo
-@USE_LIBWEBM_TRUE@am__objects_6 = internal/demux/libvireo_la-webm.lo \
+@USE_LIBVPX_TRUE@am__objects_6 = encode/libvireo_la-vp8.lo
+@USE_LIBWEBM_TRUE@am__objects_7 = internal/demux/libvireo_la-webm.lo \
 @USE_LIBWEBM_TRUE@	mux/libvireo_la-webm.lo
-@USE_LIBX264_TRUE@am__objects_7 = encode/libvireo_la-h264.lo
-@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__objects_8 = scala/jni/common/libvireo_la-jni.lo \
+@USE_LIBX264_TRUE@am__objects_8 = encode/libvireo_la-h264.lo
+@BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@am__objects_9 = scala/jni/common/libvireo_la-jni.lo \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/libvireo_la-decode.lo \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/libvireo_la-encode.lo \
 @BUILD_SCALA_TRUE@@JAVA_HOME_SET_TRUE@	scala/jni/vireo/libvireo_la-demux.lo \
@@ -222,10 +219,10 @@ am_libvireo_la_OBJECTS = common/libvireo_la-bitreader.lo \
 	common/libvireo_la-path.lo common/libvireo_la-reader.lo \
 	decode/libvireo_la-audio.lo decode/libvireo_la-video.lo \
 	demux/libvireo_la-movie.lo encode/libvireo_la-jpg.lo \
-	encode/libvireo_la-png.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_7) error/libvireo_la-error.lo \
-	header/libvireo_la-header.lo \
+	encode/libvireo_la-png.lo error/libvireo_la-error.lo \
+	frame/libvireo_la-frame.lo frame/libvireo_la-plane.lo \
+	frame/libvireo_la-rgb.lo frame/libvireo_la-util.lo \
+	frame/libvireo_la-yuv.lo header/libvireo_la-header.lo \
 	internal/decode/libvireo_la-annexb.lo \
 	internal/decode/libvireo_la-avcc.lo \
 	internal/decode/libvireo_la-h264_bytestream.lo \
@@ -237,7 +234,9 @@ am_libvireo_la_OBJECTS = common/libvireo_la-bitreader.lo \
 	util/libvireo_la-timer.lo transform/libvireo_la-stitch.lo \
 	transform/libvireo_la-trim.lo settings/libvireo_la-settings.lo \
 	sound/libvireo_la-pcm.lo sound/libvireo_la-sound.lo \
-	$(am__objects_8)
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4) $(am__objects_5) $(am__objects_6) \
+	$(am__objects_7) $(am__objects_8) $(am__objects_9)
 libvireo_la_OBJECTS = $(am_libvireo_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -577,7 +576,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ../imagecore
 libvireo_la_CPPFLAGS = -I./ -I../ -I../thirdparty/l-smash_extra \
-	$(am__append_10)
+	$(am__append_11)
 chunk_CPPFLAGS = -I../
 chunk_SOURCES = tools/chunk/main.cpp tests/test_common.cpp
 chunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
@@ -615,16 +614,18 @@ lib_LTLIBRARIES = libvireo.la
 libvireo_la_SOURCES = common/bitreader.cpp common/data.cpp \
 	common/editbox.cpp common/path.cpp common/reader.cpp \
 	decode/audio.cpp decode/video.cpp demux/movie.cpp \
-	encode/jpg.cpp encode/png.cpp $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5) $(am__append_6) \
-	$(am__append_7) $(am__append_8) error/error.cpp \
+	encode/jpg.cpp encode/png.cpp error/error.cpp frame/frame.cpp \
+	frame/plane.cpp frame/rgb.cpp frame/util.cpp frame/yuv.cpp \
 	header/header.cpp internal/decode/annexb.cpp \
 	internal/decode/avcc.cpp internal/decode/h264_bytestream.cpp \
 	internal/decode/image.cpp internal/decode/pcm.cpp \
 	internal/demux/image.cpp internal/demux/mp4.cpp mux/mp4.cpp \
 	util/caption.cpp util/ftyp.cpp util/timer.cpp \
 	transform/stitch.cpp transform/trim.cpp settings/settings.cpp \
-	sound/pcm.cpp sound/sound.cpp $(am__append_9)
+	sound/pcm.cpp sound/sound.cpp $(am__append_2) $(am__append_3) \
+	$(am__append_4) $(am__append_5) $(am__append_6) \
+	$(am__append_7) $(am__append_8) $(am__append_9) \
+	$(am__append_10)
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
 nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h \
@@ -777,14 +778,14 @@ encode/libvireo_la-jpg.lo: encode/$(am__dirstamp) \
 	encode/$(DEPDIR)/$(am__dirstamp)
 encode/libvireo_la-png.lo: encode/$(am__dirstamp) \
 	encode/$(DEPDIR)/$(am__dirstamp)
-internal/decode/$(am__dirstamp):
-	@$(MKDIR_P) internal/decode
-	@: > internal/decode/$(am__dirstamp)
-internal/decode/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) internal/decode/$(DEPDIR)
-	@: > internal/decode/$(DEPDIR)/$(am__dirstamp)
-internal/decode/libvireo_la-h264.lo: internal/decode/$(am__dirstamp) \
-	internal/decode/$(DEPDIR)/$(am__dirstamp)
+error/$(am__dirstamp):
+	@$(MKDIR_P) error
+	@: > error/$(am__dirstamp)
+error/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) error/$(DEPDIR)
+	@: > error/$(DEPDIR)/$(am__dirstamp)
+error/libvireo_la-error.lo: error/$(am__dirstamp) \
+	error/$(DEPDIR)/$(am__dirstamp)
 frame/$(am__dirstamp):
 	@$(MKDIR_P) frame
 	@: > frame/$(am__dirstamp)
@@ -801,52 +802,6 @@ frame/libvireo_la-util.lo: frame/$(am__dirstamp) \
 	frame/$(DEPDIR)/$(am__dirstamp)
 frame/libvireo_la-yuv.lo: frame/$(am__dirstamp) \
 	frame/$(DEPDIR)/$(am__dirstamp)
-internal/demux/$(am__dirstamp):
-	@$(MKDIR_P) internal/demux
-	@: > internal/demux/$(am__dirstamp)
-internal/demux/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) internal/demux/$(DEPDIR)
-	@: > internal/demux/$(DEPDIR)/$(am__dirstamp)
-internal/demux/libvireo_la-mp2ts.lo: internal/demux/$(am__dirstamp) \
-	internal/demux/$(DEPDIR)/$(am__dirstamp)
-mux/$(am__dirstamp):
-	@$(MKDIR_P) mux
-	@: > mux/$(am__dirstamp)
-mux/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) mux/$(DEPDIR)
-	@: > mux/$(DEPDIR)/$(am__dirstamp)
-mux/libvireo_la-mp2ts.lo: mux/$(am__dirstamp) \
-	mux/$(DEPDIR)/$(am__dirstamp)
-internal/decode/libvireo_la-aac.lo: internal/decode/$(am__dirstamp) \
-	internal/decode/$(DEPDIR)/$(am__dirstamp)
-encode/libvireo_la-aac.lo: encode/$(am__dirstamp) \
-	encode/$(DEPDIR)/$(am__dirstamp)
-encode/libvireo_la-vorbis.lo: encode/$(am__dirstamp) \
-	encode/$(DEPDIR)/$(am__dirstamp)
-settings/$(am__dirstamp):
-	@$(MKDIR_P) settings
-	@: > settings/$(am__dirstamp)
-settings/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) settings/$(DEPDIR)
-	@: > settings/$(DEPDIR)/$(am__dirstamp)
-settings/libvireo_la-settings-vorbis.lo: settings/$(am__dirstamp) \
-	settings/$(DEPDIR)/$(am__dirstamp)
-encode/libvireo_la-vp8.lo: encode/$(am__dirstamp) \
-	encode/$(DEPDIR)/$(am__dirstamp)
-internal/demux/libvireo_la-webm.lo: internal/demux/$(am__dirstamp) \
-	internal/demux/$(DEPDIR)/$(am__dirstamp)
-mux/libvireo_la-webm.lo: mux/$(am__dirstamp) \
-	mux/$(DEPDIR)/$(am__dirstamp)
-encode/libvireo_la-h264.lo: encode/$(am__dirstamp) \
-	encode/$(DEPDIR)/$(am__dirstamp)
-error/$(am__dirstamp):
-	@$(MKDIR_P) error
-	@: > error/$(am__dirstamp)
-error/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) error/$(DEPDIR)
-	@: > error/$(DEPDIR)/$(am__dirstamp)
-error/libvireo_la-error.lo: error/$(am__dirstamp) \
-	error/$(DEPDIR)/$(am__dirstamp)
 header/$(am__dirstamp):
 	@$(MKDIR_P) header
 	@: > header/$(am__dirstamp)
@@ -855,6 +810,12 @@ header/$(DEPDIR)/$(am__dirstamp):
 	@: > header/$(DEPDIR)/$(am__dirstamp)
 header/libvireo_la-header.lo: header/$(am__dirstamp) \
 	header/$(DEPDIR)/$(am__dirstamp)
+internal/decode/$(am__dirstamp):
+	@$(MKDIR_P) internal/decode
+	@: > internal/decode/$(am__dirstamp)
+internal/decode/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) internal/decode/$(DEPDIR)
+	@: > internal/decode/$(DEPDIR)/$(am__dirstamp)
 internal/decode/libvireo_la-annexb.lo:  \
 	internal/decode/$(am__dirstamp) \
 	internal/decode/$(DEPDIR)/$(am__dirstamp)
@@ -867,10 +828,22 @@ internal/decode/libvireo_la-image.lo: internal/decode/$(am__dirstamp) \
 	internal/decode/$(DEPDIR)/$(am__dirstamp)
 internal/decode/libvireo_la-pcm.lo: internal/decode/$(am__dirstamp) \
 	internal/decode/$(DEPDIR)/$(am__dirstamp)
+internal/demux/$(am__dirstamp):
+	@$(MKDIR_P) internal/demux
+	@: > internal/demux/$(am__dirstamp)
+internal/demux/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) internal/demux/$(DEPDIR)
+	@: > internal/demux/$(DEPDIR)/$(am__dirstamp)
 internal/demux/libvireo_la-image.lo: internal/demux/$(am__dirstamp) \
 	internal/demux/$(DEPDIR)/$(am__dirstamp)
 internal/demux/libvireo_la-mp4.lo: internal/demux/$(am__dirstamp) \
 	internal/demux/$(DEPDIR)/$(am__dirstamp)
+mux/$(am__dirstamp):
+	@$(MKDIR_P) mux
+	@: > mux/$(am__dirstamp)
+mux/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) mux/$(DEPDIR)
+	@: > mux/$(DEPDIR)/$(am__dirstamp)
 mux/libvireo_la-mp4.lo: mux/$(am__dirstamp) \
 	mux/$(DEPDIR)/$(am__dirstamp)
 util/$(am__dirstamp):
@@ -895,6 +868,12 @@ transform/libvireo_la-stitch.lo: transform/$(am__dirstamp) \
 	transform/$(DEPDIR)/$(am__dirstamp)
 transform/libvireo_la-trim.lo: transform/$(am__dirstamp) \
 	transform/$(DEPDIR)/$(am__dirstamp)
+settings/$(am__dirstamp):
+	@$(MKDIR_P) settings
+	@: > settings/$(am__dirstamp)
+settings/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) settings/$(DEPDIR)
+	@: > settings/$(DEPDIR)/$(am__dirstamp)
 settings/libvireo_la-settings.lo: settings/$(am__dirstamp) \
 	settings/$(DEPDIR)/$(am__dirstamp)
 sound/$(am__dirstamp):
@@ -907,6 +886,32 @@ sound/libvireo_la-pcm.lo: sound/$(am__dirstamp) \
 	sound/$(DEPDIR)/$(am__dirstamp)
 sound/libvireo_la-sound.lo: sound/$(am__dirstamp) \
 	sound/$(DEPDIR)/$(am__dirstamp)
+internal/decode/libvireo_la-h264.lo: internal/decode/$(am__dirstamp) \
+	internal/decode/$(DEPDIR)/$(am__dirstamp)
+internal/demux/libvireo_la-mp2ts.lo: internal/demux/$(am__dirstamp) \
+	internal/demux/$(DEPDIR)/$(am__dirstamp)
+mux/libvireo_la-mp2ts.lo: mux/$(am__dirstamp) \
+	mux/$(DEPDIR)/$(am__dirstamp)
+frame/libvireo_la-rgb-swscale.lo: frame/$(am__dirstamp) \
+	frame/$(DEPDIR)/$(am__dirstamp)
+frame/libvireo_la-yuv-swscale.lo: frame/$(am__dirstamp) \
+	frame/$(DEPDIR)/$(am__dirstamp)
+internal/decode/libvireo_la-aac.lo: internal/decode/$(am__dirstamp) \
+	internal/decode/$(DEPDIR)/$(am__dirstamp)
+encode/libvireo_la-aac.lo: encode/$(am__dirstamp) \
+	encode/$(DEPDIR)/$(am__dirstamp)
+encode/libvireo_la-vorbis.lo: encode/$(am__dirstamp) \
+	encode/$(DEPDIR)/$(am__dirstamp)
+settings/libvireo_la-settings-vorbis.lo: settings/$(am__dirstamp) \
+	settings/$(DEPDIR)/$(am__dirstamp)
+encode/libvireo_la-vp8.lo: encode/$(am__dirstamp) \
+	encode/$(DEPDIR)/$(am__dirstamp)
+internal/demux/libvireo_la-webm.lo: internal/demux/$(am__dirstamp) \
+	internal/demux/$(DEPDIR)/$(am__dirstamp)
+mux/libvireo_la-webm.lo: mux/$(am__dirstamp) \
+	mux/$(DEPDIR)/$(am__dirstamp)
+encode/libvireo_la-h264.lo: encode/$(am__dirstamp) \
+	encode/$(DEPDIR)/$(am__dirstamp)
 scala/jni/common/$(am__dirstamp):
 	@$(MKDIR_P) scala/jni/common
 	@: > scala/jni/common/$(am__dirstamp)
@@ -1223,8 +1228,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@error/$(DEPDIR)/libvireo_la-error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-frame.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-plane.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-rgb-swscale.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-rgb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-yuv-swscale.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@frame/$(DEPDIR)/libvireo_la-yuv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@header/$(DEPDIR)/libvireo_la-header.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@internal/decode/$(DEPDIR)/libvireo_la-aac.Plo@am__quote@
@@ -1376,12 +1383,12 @@ encode/libvireo_la-png.lo: encode/png.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-png.lo `test -f 'encode/png.cpp' || echo '$(srcdir)/'`encode/png.cpp
 
-internal/decode/libvireo_la-h264.lo: internal/decode/h264.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/decode/libvireo_la-h264.lo -MD -MP -MF internal/decode/$(DEPDIR)/libvireo_la-h264.Tpo -c -o internal/decode/libvireo_la-h264.lo `test -f 'internal/decode/h264.cpp' || echo '$(srcdir)/'`internal/decode/h264.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/decode/$(DEPDIR)/libvireo_la-h264.Tpo internal/decode/$(DEPDIR)/libvireo_la-h264.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/decode/h264.cpp' object='internal/decode/libvireo_la-h264.lo' libtool=yes @AMDEPBACKSLASH@
+error/libvireo_la-error.lo: error/error.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT error/libvireo_la-error.lo -MD -MP -MF error/$(DEPDIR)/libvireo_la-error.Tpo -c -o error/libvireo_la-error.lo `test -f 'error/error.cpp' || echo '$(srcdir)/'`error/error.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) error/$(DEPDIR)/libvireo_la-error.Tpo error/$(DEPDIR)/libvireo_la-error.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='error/error.cpp' object='error/libvireo_la-error.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/decode/libvireo_la-h264.lo `test -f 'internal/decode/h264.cpp' || echo '$(srcdir)/'`internal/decode/h264.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o error/libvireo_la-error.lo `test -f 'error/error.cpp' || echo '$(srcdir)/'`error/error.cpp
 
 frame/libvireo_la-frame.lo: frame/frame.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT frame/libvireo_la-frame.lo -MD -MP -MF frame/$(DEPDIR)/libvireo_la-frame.Tpo -c -o frame/libvireo_la-frame.lo `test -f 'frame/frame.cpp' || echo '$(srcdir)/'`frame/frame.cpp
@@ -1417,83 +1424,6 @@ frame/libvireo_la-yuv.lo: frame/yuv.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='frame/yuv.cpp' object='frame/libvireo_la-yuv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o frame/libvireo_la-yuv.lo `test -f 'frame/yuv.cpp' || echo '$(srcdir)/'`frame/yuv.cpp
-
-internal/demux/libvireo_la-mp2ts.lo: internal/demux/mp2ts.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/demux/libvireo_la-mp2ts.lo -MD -MP -MF internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Tpo -c -o internal/demux/libvireo_la-mp2ts.lo `test -f 'internal/demux/mp2ts.cpp' || echo '$(srcdir)/'`internal/demux/mp2ts.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Tpo internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/demux/mp2ts.cpp' object='internal/demux/libvireo_la-mp2ts.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/demux/libvireo_la-mp2ts.lo `test -f 'internal/demux/mp2ts.cpp' || echo '$(srcdir)/'`internal/demux/mp2ts.cpp
-
-mux/libvireo_la-mp2ts.lo: mux/mp2ts.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mux/libvireo_la-mp2ts.lo -MD -MP -MF mux/$(DEPDIR)/libvireo_la-mp2ts.Tpo -c -o mux/libvireo_la-mp2ts.lo `test -f 'mux/mp2ts.cpp' || echo '$(srcdir)/'`mux/mp2ts.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) mux/$(DEPDIR)/libvireo_la-mp2ts.Tpo mux/$(DEPDIR)/libvireo_la-mp2ts.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='mux/mp2ts.cpp' object='mux/libvireo_la-mp2ts.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mux/libvireo_la-mp2ts.lo `test -f 'mux/mp2ts.cpp' || echo '$(srcdir)/'`mux/mp2ts.cpp
-
-internal/decode/libvireo_la-aac.lo: internal/decode/aac.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/decode/libvireo_la-aac.lo -MD -MP -MF internal/decode/$(DEPDIR)/libvireo_la-aac.Tpo -c -o internal/decode/libvireo_la-aac.lo `test -f 'internal/decode/aac.cpp' || echo '$(srcdir)/'`internal/decode/aac.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/decode/$(DEPDIR)/libvireo_la-aac.Tpo internal/decode/$(DEPDIR)/libvireo_la-aac.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/decode/aac.cpp' object='internal/decode/libvireo_la-aac.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/decode/libvireo_la-aac.lo `test -f 'internal/decode/aac.cpp' || echo '$(srcdir)/'`internal/decode/aac.cpp
-
-encode/libvireo_la-aac.lo: encode/aac.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-aac.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-aac.Tpo -c -o encode/libvireo_la-aac.lo `test -f 'encode/aac.cpp' || echo '$(srcdir)/'`encode/aac.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-aac.Tpo encode/$(DEPDIR)/libvireo_la-aac.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/aac.cpp' object='encode/libvireo_la-aac.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-aac.lo `test -f 'encode/aac.cpp' || echo '$(srcdir)/'`encode/aac.cpp
-
-encode/libvireo_la-vorbis.lo: encode/vorbis.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-vorbis.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-vorbis.Tpo -c -o encode/libvireo_la-vorbis.lo `test -f 'encode/vorbis.cpp' || echo '$(srcdir)/'`encode/vorbis.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-vorbis.Tpo encode/$(DEPDIR)/libvireo_la-vorbis.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/vorbis.cpp' object='encode/libvireo_la-vorbis.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-vorbis.lo `test -f 'encode/vorbis.cpp' || echo '$(srcdir)/'`encode/vorbis.cpp
-
-settings/libvireo_la-settings-vorbis.lo: settings/settings-vorbis.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT settings/libvireo_la-settings-vorbis.lo -MD -MP -MF settings/$(DEPDIR)/libvireo_la-settings-vorbis.Tpo -c -o settings/libvireo_la-settings-vorbis.lo `test -f 'settings/settings-vorbis.cpp' || echo '$(srcdir)/'`settings/settings-vorbis.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) settings/$(DEPDIR)/libvireo_la-settings-vorbis.Tpo settings/$(DEPDIR)/libvireo_la-settings-vorbis.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='settings/settings-vorbis.cpp' object='settings/libvireo_la-settings-vorbis.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o settings/libvireo_la-settings-vorbis.lo `test -f 'settings/settings-vorbis.cpp' || echo '$(srcdir)/'`settings/settings-vorbis.cpp
-
-encode/libvireo_la-vp8.lo: encode/vp8.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-vp8.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-vp8.Tpo -c -o encode/libvireo_la-vp8.lo `test -f 'encode/vp8.cpp' || echo '$(srcdir)/'`encode/vp8.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-vp8.Tpo encode/$(DEPDIR)/libvireo_la-vp8.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/vp8.cpp' object='encode/libvireo_la-vp8.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-vp8.lo `test -f 'encode/vp8.cpp' || echo '$(srcdir)/'`encode/vp8.cpp
-
-internal/demux/libvireo_la-webm.lo: internal/demux/webm.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/demux/libvireo_la-webm.lo -MD -MP -MF internal/demux/$(DEPDIR)/libvireo_la-webm.Tpo -c -o internal/demux/libvireo_la-webm.lo `test -f 'internal/demux/webm.cpp' || echo '$(srcdir)/'`internal/demux/webm.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/demux/$(DEPDIR)/libvireo_la-webm.Tpo internal/demux/$(DEPDIR)/libvireo_la-webm.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/demux/webm.cpp' object='internal/demux/libvireo_la-webm.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/demux/libvireo_la-webm.lo `test -f 'internal/demux/webm.cpp' || echo '$(srcdir)/'`internal/demux/webm.cpp
-
-mux/libvireo_la-webm.lo: mux/webm.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mux/libvireo_la-webm.lo -MD -MP -MF mux/$(DEPDIR)/libvireo_la-webm.Tpo -c -o mux/libvireo_la-webm.lo `test -f 'mux/webm.cpp' || echo '$(srcdir)/'`mux/webm.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) mux/$(DEPDIR)/libvireo_la-webm.Tpo mux/$(DEPDIR)/libvireo_la-webm.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='mux/webm.cpp' object='mux/libvireo_la-webm.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mux/libvireo_la-webm.lo `test -f 'mux/webm.cpp' || echo '$(srcdir)/'`mux/webm.cpp
-
-encode/libvireo_la-h264.lo: encode/h264.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-h264.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-h264.Tpo -c -o encode/libvireo_la-h264.lo `test -f 'encode/h264.cpp' || echo '$(srcdir)/'`encode/h264.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-h264.Tpo encode/$(DEPDIR)/libvireo_la-h264.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/h264.cpp' object='encode/libvireo_la-h264.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-h264.lo `test -f 'encode/h264.cpp' || echo '$(srcdir)/'`encode/h264.cpp
-
-error/libvireo_la-error.lo: error/error.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT error/libvireo_la-error.lo -MD -MP -MF error/$(DEPDIR)/libvireo_la-error.Tpo -c -o error/libvireo_la-error.lo `test -f 'error/error.cpp' || echo '$(srcdir)/'`error/error.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) error/$(DEPDIR)/libvireo_la-error.Tpo error/$(DEPDIR)/libvireo_la-error.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='error/error.cpp' object='error/libvireo_la-error.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o error/libvireo_la-error.lo `test -f 'error/error.cpp' || echo '$(srcdir)/'`error/error.cpp
 
 header/libvireo_la-header.lo: header/header.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT header/libvireo_la-header.lo -MD -MP -MF header/$(DEPDIR)/libvireo_la-header.Tpo -c -o header/libvireo_la-header.lo `test -f 'header/header.cpp' || echo '$(srcdir)/'`header/header.cpp
@@ -1613,6 +1543,97 @@ sound/libvireo_la-sound.lo: sound/sound.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='sound/sound.cpp' object='sound/libvireo_la-sound.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o sound/libvireo_la-sound.lo `test -f 'sound/sound.cpp' || echo '$(srcdir)/'`sound/sound.cpp
+
+internal/decode/libvireo_la-h264.lo: internal/decode/h264.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/decode/libvireo_la-h264.lo -MD -MP -MF internal/decode/$(DEPDIR)/libvireo_la-h264.Tpo -c -o internal/decode/libvireo_la-h264.lo `test -f 'internal/decode/h264.cpp' || echo '$(srcdir)/'`internal/decode/h264.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/decode/$(DEPDIR)/libvireo_la-h264.Tpo internal/decode/$(DEPDIR)/libvireo_la-h264.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/decode/h264.cpp' object='internal/decode/libvireo_la-h264.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/decode/libvireo_la-h264.lo `test -f 'internal/decode/h264.cpp' || echo '$(srcdir)/'`internal/decode/h264.cpp
+
+internal/demux/libvireo_la-mp2ts.lo: internal/demux/mp2ts.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/demux/libvireo_la-mp2ts.lo -MD -MP -MF internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Tpo -c -o internal/demux/libvireo_la-mp2ts.lo `test -f 'internal/demux/mp2ts.cpp' || echo '$(srcdir)/'`internal/demux/mp2ts.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Tpo internal/demux/$(DEPDIR)/libvireo_la-mp2ts.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/demux/mp2ts.cpp' object='internal/demux/libvireo_la-mp2ts.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/demux/libvireo_la-mp2ts.lo `test -f 'internal/demux/mp2ts.cpp' || echo '$(srcdir)/'`internal/demux/mp2ts.cpp
+
+mux/libvireo_la-mp2ts.lo: mux/mp2ts.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mux/libvireo_la-mp2ts.lo -MD -MP -MF mux/$(DEPDIR)/libvireo_la-mp2ts.Tpo -c -o mux/libvireo_la-mp2ts.lo `test -f 'mux/mp2ts.cpp' || echo '$(srcdir)/'`mux/mp2ts.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) mux/$(DEPDIR)/libvireo_la-mp2ts.Tpo mux/$(DEPDIR)/libvireo_la-mp2ts.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='mux/mp2ts.cpp' object='mux/libvireo_la-mp2ts.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mux/libvireo_la-mp2ts.lo `test -f 'mux/mp2ts.cpp' || echo '$(srcdir)/'`mux/mp2ts.cpp
+
+frame/libvireo_la-rgb-swscale.lo: frame/rgb-swscale.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT frame/libvireo_la-rgb-swscale.lo -MD -MP -MF frame/$(DEPDIR)/libvireo_la-rgb-swscale.Tpo -c -o frame/libvireo_la-rgb-swscale.lo `test -f 'frame/rgb-swscale.cpp' || echo '$(srcdir)/'`frame/rgb-swscale.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) frame/$(DEPDIR)/libvireo_la-rgb-swscale.Tpo frame/$(DEPDIR)/libvireo_la-rgb-swscale.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='frame/rgb-swscale.cpp' object='frame/libvireo_la-rgb-swscale.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o frame/libvireo_la-rgb-swscale.lo `test -f 'frame/rgb-swscale.cpp' || echo '$(srcdir)/'`frame/rgb-swscale.cpp
+
+frame/libvireo_la-yuv-swscale.lo: frame/yuv-swscale.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT frame/libvireo_la-yuv-swscale.lo -MD -MP -MF frame/$(DEPDIR)/libvireo_la-yuv-swscale.Tpo -c -o frame/libvireo_la-yuv-swscale.lo `test -f 'frame/yuv-swscale.cpp' || echo '$(srcdir)/'`frame/yuv-swscale.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) frame/$(DEPDIR)/libvireo_la-yuv-swscale.Tpo frame/$(DEPDIR)/libvireo_la-yuv-swscale.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='frame/yuv-swscale.cpp' object='frame/libvireo_la-yuv-swscale.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o frame/libvireo_la-yuv-swscale.lo `test -f 'frame/yuv-swscale.cpp' || echo '$(srcdir)/'`frame/yuv-swscale.cpp
+
+internal/decode/libvireo_la-aac.lo: internal/decode/aac.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/decode/libvireo_la-aac.lo -MD -MP -MF internal/decode/$(DEPDIR)/libvireo_la-aac.Tpo -c -o internal/decode/libvireo_la-aac.lo `test -f 'internal/decode/aac.cpp' || echo '$(srcdir)/'`internal/decode/aac.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/decode/$(DEPDIR)/libvireo_la-aac.Tpo internal/decode/$(DEPDIR)/libvireo_la-aac.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/decode/aac.cpp' object='internal/decode/libvireo_la-aac.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/decode/libvireo_la-aac.lo `test -f 'internal/decode/aac.cpp' || echo '$(srcdir)/'`internal/decode/aac.cpp
+
+encode/libvireo_la-aac.lo: encode/aac.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-aac.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-aac.Tpo -c -o encode/libvireo_la-aac.lo `test -f 'encode/aac.cpp' || echo '$(srcdir)/'`encode/aac.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-aac.Tpo encode/$(DEPDIR)/libvireo_la-aac.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/aac.cpp' object='encode/libvireo_la-aac.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-aac.lo `test -f 'encode/aac.cpp' || echo '$(srcdir)/'`encode/aac.cpp
+
+encode/libvireo_la-vorbis.lo: encode/vorbis.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-vorbis.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-vorbis.Tpo -c -o encode/libvireo_la-vorbis.lo `test -f 'encode/vorbis.cpp' || echo '$(srcdir)/'`encode/vorbis.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-vorbis.Tpo encode/$(DEPDIR)/libvireo_la-vorbis.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/vorbis.cpp' object='encode/libvireo_la-vorbis.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-vorbis.lo `test -f 'encode/vorbis.cpp' || echo '$(srcdir)/'`encode/vorbis.cpp
+
+settings/libvireo_la-settings-vorbis.lo: settings/settings-vorbis.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT settings/libvireo_la-settings-vorbis.lo -MD -MP -MF settings/$(DEPDIR)/libvireo_la-settings-vorbis.Tpo -c -o settings/libvireo_la-settings-vorbis.lo `test -f 'settings/settings-vorbis.cpp' || echo '$(srcdir)/'`settings/settings-vorbis.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) settings/$(DEPDIR)/libvireo_la-settings-vorbis.Tpo settings/$(DEPDIR)/libvireo_la-settings-vorbis.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='settings/settings-vorbis.cpp' object='settings/libvireo_la-settings-vorbis.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o settings/libvireo_la-settings-vorbis.lo `test -f 'settings/settings-vorbis.cpp' || echo '$(srcdir)/'`settings/settings-vorbis.cpp
+
+encode/libvireo_la-vp8.lo: encode/vp8.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-vp8.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-vp8.Tpo -c -o encode/libvireo_la-vp8.lo `test -f 'encode/vp8.cpp' || echo '$(srcdir)/'`encode/vp8.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-vp8.Tpo encode/$(DEPDIR)/libvireo_la-vp8.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/vp8.cpp' object='encode/libvireo_la-vp8.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-vp8.lo `test -f 'encode/vp8.cpp' || echo '$(srcdir)/'`encode/vp8.cpp
+
+internal/demux/libvireo_la-webm.lo: internal/demux/webm.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT internal/demux/libvireo_la-webm.lo -MD -MP -MF internal/demux/$(DEPDIR)/libvireo_la-webm.Tpo -c -o internal/demux/libvireo_la-webm.lo `test -f 'internal/demux/webm.cpp' || echo '$(srcdir)/'`internal/demux/webm.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) internal/demux/$(DEPDIR)/libvireo_la-webm.Tpo internal/demux/$(DEPDIR)/libvireo_la-webm.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='internal/demux/webm.cpp' object='internal/demux/libvireo_la-webm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o internal/demux/libvireo_la-webm.lo `test -f 'internal/demux/webm.cpp' || echo '$(srcdir)/'`internal/demux/webm.cpp
+
+mux/libvireo_la-webm.lo: mux/webm.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mux/libvireo_la-webm.lo -MD -MP -MF mux/$(DEPDIR)/libvireo_la-webm.Tpo -c -o mux/libvireo_la-webm.lo `test -f 'mux/webm.cpp' || echo '$(srcdir)/'`mux/webm.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) mux/$(DEPDIR)/libvireo_la-webm.Tpo mux/$(DEPDIR)/libvireo_la-webm.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='mux/webm.cpp' object='mux/libvireo_la-webm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mux/libvireo_la-webm.lo `test -f 'mux/webm.cpp' || echo '$(srcdir)/'`mux/webm.cpp
+
+encode/libvireo_la-h264.lo: encode/h264.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode/libvireo_la-h264.lo -MD -MP -MF encode/$(DEPDIR)/libvireo_la-h264.Tpo -c -o encode/libvireo_la-h264.lo `test -f 'encode/h264.cpp' || echo '$(srcdir)/'`encode/h264.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) encode/$(DEPDIR)/libvireo_la-h264.Tpo encode/$(DEPDIR)/libvireo_la-h264.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='encode/h264.cpp' object='encode/libvireo_la-h264.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode/libvireo_la-h264.lo `test -f 'encode/h264.cpp' || echo '$(srcdir)/'`encode/h264.cpp
 
 scala/jni/common/libvireo_la-jni.lo: scala/jni/common/jni.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scala/jni/common/libvireo_la-jni.lo -MD -MP -MF scala/jni/common/$(DEPDIR)/libvireo_la-jni.Tpo -c -o scala/jni/common/libvireo_la-jni.lo `test -f 'scala/jni/common/jni.cpp' || echo '$(srcdir)/'`scala/jni/common/jni.cpp

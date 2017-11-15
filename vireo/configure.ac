@@ -22,6 +22,10 @@ AC_PROG_RANLIB
 AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX_14([ext],[mandatory])
 
+# Compile flags
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],[CXXFLAGS="${CXXFLAGS} -fvisibility=hidden -fvisibility-inlines-hidden"],
+  [AC_MSG_ERROR([Cannot set default visibility. Please use another compiler.])])
+
 # Handles java/scala
 AC_ARG_ENABLE([scala],
   [AS_HELP_STRING([--enable-scala],
@@ -76,6 +80,7 @@ AM_CONDITIONAL([USE_LIBAVFORMAT], [test `grep -c HAVE_LIBAVFORMAT confdefs.h` -e
 AM_CONDITIONAL([USE_LIBAVUTIL], [test `grep -c HAVE_LIBAVUTIL confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBFDK_AAC], [test `grep -c HAVE_LIBFDK_AAC confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBLSMASH], [test `grep -c HAVE_LIBLSMASH confdefs.h` -eq 1])
+AM_CONDITIONAL([USE_LIBSWSCALE], [test `grep -c HAVE_LIBSWSCALE confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVORBIS], [test `grep -c HAVE_LIBVORBIS confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVORBISENC], [test `grep -c HAVE_LIBVORBISENC confdefs.h` -eq 1])
 AM_CONDITIONAL([USE_LIBVPX], [test `grep -c HAVE_LIBVPX confdefs.h` -eq 1])

@@ -35,7 +35,7 @@ namespace decode {
 
 using namespace vireo::decode;
 
-class PUBLIC PCM final : public functional::DirectAudio<PCM, sound::Sound> {
+class PCM final : public functional::DirectAudio<PCM, sound::Sound> {
   std::shared_ptr<struct _PCM> _this;
 public:
   PCM(const functional::Audio<Sample>& track);

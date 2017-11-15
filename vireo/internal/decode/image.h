@@ -35,7 +35,7 @@ namespace decode {
 
 using namespace vireo::decode;
 
-class PUBLIC Image final : public functional::DirectVideo<Image, frame::Frame> {
+class Image final : public functional::DirectVideo<Image, frame::Frame> {
   std::shared_ptr<struct _Image> _this;
 
 public:

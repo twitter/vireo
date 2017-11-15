@@ -35,7 +35,7 @@ namespace demux {
 
 using namespace vireo::decode;
 
-class PUBLIC MP4 final {
+class MP4 final {
   std::shared_ptr<struct _MP4> _this = nullptr;
 public:
   MP4(common::Reader&& reader);

@@ -30,7 +30,7 @@
 namespace vireo {
 namespace header {
 
-struct SPS_PPS {
+struct PUBLIC SPS_PPS {
   common::Data16 sps;
   common::Data16 pps;
   uint8_t nalu_length_size;
