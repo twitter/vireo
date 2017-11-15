@@ -1,6 +1,26 @@
-//  Copyright 2017 Twitter, Inc.
-//  Licensed under the Apache License, Version 2.0
-//  http://www.apache.org/licenses/LICENSE-2.0
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 Twitter
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include <iomanip>
 #include <fstream>
@@ -88,9 +108,8 @@ void print_usage(const string name) {
   cout << std::left << std::setw(opt_len) << "-qp_min:"           << std::left << std::setw(desc_len) << "minimum quantizer" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-keyint_max:"       << std::left << std::setw(desc_len) << "maximum interval between IDR-frames" << "(default: 1<<30)" << endl;
   cout << std::left << std::setw(opt_len) << "-keyint_min:"       << std::left << std::setw(desc_len) << "minimum interval between IDR-frames" << "(default: 0)" << endl;
-  cout << std::left << std::setw(opt_len) << "--b_rc_mbtree:"     << std::left << std::setw(desc_len) << "macroblock tree ratecontrol" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-stats_log_path:"   << std::left << std::setw(desc_len) << "input/output path for stats file" << "(default: \"\")" << endl;
-  cout << std::left << std::setw(opt_len) << "--rc_b_mb_tree:"    << std::left << std::setw(desc_len) << "enable mb_tree rate control" << "(default: 0)" << endl;
+  cout << std::left << std::setw(opt_len) << "--rc_b_mb_tree:"    << std::left << std::setw(desc_len) << "enable macroblock tree rate control" << "(default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-pyramid_mode:"     << std::left << std::setw(desc_len) << "allow the use of B-frames as references for other frames" << "(none: 0, strcit: 1, normal: 2, default: 0)" << endl;
   cout << std::left << std::setw(opt_len) << "-me_method:"        << std::left << std::setw(desc_len) << "motion estimation method" << "(DIA: 0, HEX: 1, UMH: 2, ESA: 3, TESA: 4, default: 1)" << endl;
   cout << std::left << std::setw(opt_len) << "-subpel_refine:"    << std::left << std::setw(desc_len) << "subpixel motion estimation quality" << "(default: 4)" << endl;

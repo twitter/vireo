@@ -16,6 +16,7 @@
 
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -90,8 +91,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = frames$(EXEEXT) $(am__EXEEXT_1)
-@USE_LIBAVCODEC_TRUE@am__append_1 = remux trim stitch thumbnails transcode unchunk validate viddiff
+bin_PROGRAMS = frames$(EXEEXT) chunk$(EXEEXT) frames$(EXEEXT) \
+	stitch$(EXEEXT) trim$(EXEEXT) unchunk$(EXEEXT) $(am__EXEEXT_1)
+@USE_LIBAVCODEC_TRUE@am__append_1 = psnr remux thumbnails transcode validate viddiff
 @USE_LIBAVCODEC_TRUE@am__append_2 = internal/decode/h264.cpp \
 @USE_LIBAVCODEC_TRUE@	frame/frame.cpp frame/plane.cpp \
 @USE_LIBAVCODEC_TRUE@	frame/rgb.cpp frame/util.cpp \
@@ -133,7 +135,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = vireo.pc
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -163,7 +165,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgincludedir)"
+	"$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(pkgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libvireo_la_DEPENDENCIES = ../imagecore/libimagecore.la
 am__libvireo_la_SOURCES_DIST = common/bitreader.cpp common/data.cpp \
@@ -244,15 +246,24 @@ am__v_lt_1 =
 libvireo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libvireo_la_LDFLAGS) $(LDFLAGS) -o $@
-@USE_LIBAVCODEC_TRUE@am__EXEEXT_1 = remux$(EXEEXT) trim$(EXEEXT) \
-@USE_LIBAVCODEC_TRUE@	stitch$(EXEEXT) thumbnails$(EXEEXT) \
-@USE_LIBAVCODEC_TRUE@	transcode$(EXEEXT) unchunk$(EXEEXT) \
+@USE_LIBAVCODEC_TRUE@am__EXEEXT_1 = psnr$(EXEEXT) remux$(EXEEXT) \
+@USE_LIBAVCODEC_TRUE@	thumbnails$(EXEEXT) transcode$(EXEEXT) \
 @USE_LIBAVCODEC_TRUE@	validate$(EXEEXT) viddiff$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
+am_chunk_OBJECTS = tools/chunk/chunk-main.$(OBJEXT) \
+	tests/chunk-test_common.$(OBJEXT)
+chunk_OBJECTS = $(am_chunk_OBJECTS)
+chunk_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
 am_frames_OBJECTS = tools/frames/frames-main.$(OBJEXT) \
 	tests/frames-test_common.$(OBJEXT)
 frames_OBJECTS = $(am_frames_OBJECTS)
 frames_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
+am__psnr_SOURCES_DIST = tools/psnr/main.cpp tests/test_common.cpp
+@USE_LIBAVCODEC_TRUE@am_psnr_OBJECTS = tools/psnr/psnr-main.$(OBJEXT) \
+@USE_LIBAVCODEC_TRUE@	tests/psnr-test_common.$(OBJEXT)
+psnr_OBJECTS = $(am_psnr_OBJECTS)
+@USE_LIBAVCODEC_TRUE@psnr_DEPENDENCIES = ./libvireo.la \
+@USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
 am__remux_SOURCES_DIST = tools/remux/main.cpp tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@am_remux_OBJECTS =  \
 @USE_LIBAVCODEC_TRUE@	tools/remux/remux-main.$(OBJEXT) \
@@ -260,13 +271,10 @@ am__remux_SOURCES_DIST = tools/remux/main.cpp tests/test_common.cpp
 remux_OBJECTS = $(am_remux_OBJECTS)
 @USE_LIBAVCODEC_TRUE@remux_DEPENDENCIES = ./libvireo.la \
 @USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
-am__stitch_SOURCES_DIST = tools/stitch/main.cpp tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@am_stitch_OBJECTS =  \
-@USE_LIBAVCODEC_TRUE@	tools/stitch/stitch-main.$(OBJEXT) \
-@USE_LIBAVCODEC_TRUE@	tests/stitch-test_common.$(OBJEXT)
+am_stitch_OBJECTS = tools/stitch/stitch-main.$(OBJEXT) \
+	tests/stitch-test_common.$(OBJEXT)
 stitch_OBJECTS = $(am_stitch_OBJECTS)
-@USE_LIBAVCODEC_TRUE@stitch_DEPENDENCIES = ./libvireo.la \
-@USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
+stitch_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
 am__thumbnails_SOURCES_DIST = tools/thumbnails/main.cpp \
 	tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@am_thumbnails_OBJECTS = tools/thumbnails/thumbnails-main.$(OBJEXT) \
@@ -282,20 +290,14 @@ am__transcode_SOURCES_DIST = tools/transcode/main.cpp \
 transcode_OBJECTS = $(am_transcode_OBJECTS)
 @USE_LIBAVCODEC_TRUE@transcode_DEPENDENCIES = ./libvireo.la \
 @USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
-am__trim_SOURCES_DIST = tools/trim/main.cpp tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@am_trim_OBJECTS = tools/trim/trim-main.$(OBJEXT) \
-@USE_LIBAVCODEC_TRUE@	tests/trim-test_common.$(OBJEXT)
+am_trim_OBJECTS = tools/trim/trim-main.$(OBJEXT) \
+	tests/trim-test_common.$(OBJEXT)
 trim_OBJECTS = $(am_trim_OBJECTS)
-@USE_LIBAVCODEC_TRUE@trim_DEPENDENCIES = ./libvireo.la \
-@USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
-am__unchunk_SOURCES_DIST = tools/unchunk/main.cpp \
-	tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@am_unchunk_OBJECTS =  \
-@USE_LIBAVCODEC_TRUE@	tools/unchunk/unchunk-main.$(OBJEXT) \
-@USE_LIBAVCODEC_TRUE@	tests/unchunk-test_common.$(OBJEXT)
+trim_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
+am_unchunk_OBJECTS = tools/unchunk/unchunk-main.$(OBJEXT) \
+	tests/unchunk-test_common.$(OBJEXT)
 unchunk_OBJECTS = $(am_unchunk_OBJECTS)
-@USE_LIBAVCODEC_TRUE@unchunk_DEPENDENCIES = ./libvireo.la \
-@USE_LIBAVCODEC_TRUE@	../imagecore/libimagecore.la
+unchunk_DEPENDENCIES = ./libvireo.la ../imagecore/libimagecore.la
 am__validate_SOURCES_DIST = tools/validate/main.cpp \
 	tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@am_validate_OBJECTS =  \
@@ -346,14 +348,15 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libvireo_la_SOURCES) $(frames_SOURCES) $(remux_SOURCES) \
-	$(stitch_SOURCES) $(thumbnails_SOURCES) $(transcode_SOURCES) \
-	$(trim_SOURCES) $(unchunk_SOURCES) $(validate_SOURCES) \
-	$(viddiff_SOURCES)
-DIST_SOURCES = $(am__libvireo_la_SOURCES_DIST) $(frames_SOURCES) \
-	$(am__remux_SOURCES_DIST) $(am__stitch_SOURCES_DIST) \
+SOURCES = $(libvireo_la_SOURCES) $(chunk_SOURCES) $(frames_SOURCES) \
+	$(psnr_SOURCES) $(remux_SOURCES) $(stitch_SOURCES) \
+	$(thumbnails_SOURCES) $(transcode_SOURCES) $(trim_SOURCES) \
+	$(unchunk_SOURCES) $(validate_SOURCES) $(viddiff_SOURCES)
+DIST_SOURCES = $(am__libvireo_la_SOURCES_DIST) $(chunk_SOURCES) \
+	$(frames_SOURCES) $(am__psnr_SOURCES_DIST) \
+	$(am__remux_SOURCES_DIST) $(stitch_SOURCES) \
 	$(am__thumbnails_SOURCES_DIST) $(am__transcode_SOURCES_DIST) \
-	$(am__trim_SOURCES_DIST) $(am__unchunk_SOURCES_DIST) \
+	$(trim_SOURCES) $(unchunk_SOURCES) \
 	$(am__validate_SOURCES_DIST) $(am__viddiff_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
@@ -368,6 +371,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+DATA = $(pkgconfig_DATA)
 HEADERS = $(nobase_pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -399,8 +403,9 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in compile \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(srcdir)/vireo.pc.in compile config.guess config.sub depcomp \
+	install-sh ltmain.sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -573,27 +578,33 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ../imagecore
 libvireo_la_CPPFLAGS = -I./ -I../ -I../thirdparty/l-smash_extra \
 	$(am__append_10)
+chunk_CPPFLAGS = -I../
+chunk_SOURCES = tools/chunk/main.cpp tests/test_common.cpp
+chunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 frames_CPPFLAGS = -I../
-frames_SOURCES = tools/frames/main.cpp  tests/test_common.cpp
+frames_SOURCES = tools/frames/main.cpp tests/test_common.cpp
 frames_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+stitch_CPPFLAGS = -I../
+stitch_SOURCES = tools/stitch/main.cpp tests/test_common.cpp
+stitch_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+trim_CPPFLAGS = -I../
+trim_SOURCES = tools/trim/main.cpp tests/test_common.cpp
+trim_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+unchunk_CPPFLAGS = -I../
+unchunk_SOURCES = tools/unchunk/main.cpp tests/test_common.cpp
+unchunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
+@USE_LIBAVCODEC_TRUE@psnr_CPPFLAGS = -I../
+@USE_LIBAVCODEC_TRUE@psnr_SOURCES = tools/psnr/main.cpp tests/test_common.cpp
+@USE_LIBAVCODEC_TRUE@psnr_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 @USE_LIBAVCODEC_TRUE@remux_CPPFLAGS = -I../
-@USE_LIBAVCODEC_TRUE@remux_SOURCES = tools/remux/main.cpp  tests/test_common.cpp
+@USE_LIBAVCODEC_TRUE@remux_SOURCES = tools/remux/main.cpp tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@remux_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-@USE_LIBAVCODEC_TRUE@stitch_CPPFLAGS = -I../
-@USE_LIBAVCODEC_TRUE@stitch_SOURCES = tools/stitch/main.cpp tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@stitch_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 @USE_LIBAVCODEC_TRUE@thumbnails_CPPFLAGS = -I../
 @USE_LIBAVCODEC_TRUE@thumbnails_SOURCES = tools/thumbnails/main.cpp tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@thumbnails_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 @USE_LIBAVCODEC_TRUE@transcode_CPPFLAGS = -I../
 @USE_LIBAVCODEC_TRUE@transcode_SOURCES = tools/transcode/main.cpp tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@transcode_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-@USE_LIBAVCODEC_TRUE@trim_CPPFLAGS = -I../
-@USE_LIBAVCODEC_TRUE@trim_SOURCES = tools/trim/main.cpp tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@trim_LDADD = ./libvireo.la ../imagecore/libimagecore.la
-@USE_LIBAVCODEC_TRUE@unchunk_CPPFLAGS = -I../
-@USE_LIBAVCODEC_TRUE@unchunk_SOURCES = tools/unchunk/main.cpp tests/test_common.cpp
-@USE_LIBAVCODEC_TRUE@unchunk_LDADD = ./libvireo.la ../imagecore/libimagecore.la
 @USE_LIBAVCODEC_TRUE@validate_CPPFLAGS = -I../
 @USE_LIBAVCODEC_TRUE@validate_SOURCES = tools/validate/main.cpp tests/test_common.cpp
 @USE_LIBAVCODEC_TRUE@validate_LDADD = ./libvireo.la ../imagecore/libimagecore.la
@@ -616,17 +627,22 @@ libvireo_la_SOURCES = common/bitreader.cpp common/data.cpp \
 	sound/pcm.cpp sound/sound.cpp $(am__append_9)
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
-nobase_pkginclude_HEADERS = base_cpp.h base_h.h version.h types.h \
-	constants.h common/bitreader.h common/data.h common/editbox.h \
-	common/math.h common/path.h common/reader.h common/ref.h \
-	common/security.h decode/audio.h decode/types.h decode/video.h \
-	demux/movie.h domain/util.h encode/aac.h encode/h264.h \
-	encode/jpg.h encode/png.h encode/types.h encode/util.h \
-	encode/vorbis.h encode/vp8.h error/error.h frame/frame.h \
-	frame/plane.h frame/rgb.h frame/util.h frame/yuv.h \
-	header/header.h mux/mp2ts.h mux/mp4.h mux/webm.h \
-	settings/settings.h transform/stitch.h transform/trim.h \
-	util/caption.h util/ftyp.h util/timer.h util/util.h
+nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h \
+	dependency.hpp base_h.h types.h version.h common/bitreader.h \
+	common/data.h common/editbox.h common/enum.hpp common/math.h \
+	common/path.h common/reader.h common/ref.h common/security.h \
+	decode/audio.h decode/types.h decode/video.h demux/movie.h \
+	domain/interval.hpp domain/interval-transform.hpp \
+	domain/util.h encode/aac.h encode/h264.h encode/jpg.h \
+	encode/png.h encode/types.h encode/util.h encode/vorbis.h \
+	encode/vp8.h error/error.h frame/frame.h frame/plane.h \
+	frame/rgb.h frame/util.h frame/yuv.h functional/function.hpp \
+	functional/media.hpp header/header.h mux/mp2ts.h mux/mp4.h \
+	mux/webm.h settings/settings.h sound/pcm.h sound/sound.h \
+	transform/stitch.h transform/trim.h util/caption.h util/ftyp.h \
+	util/timer.h util/util.h
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = vireo.pc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -680,6 +696,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+vireo.pc: $(top_builddir)/config.status $(srcdir)/vireo.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -974,6 +992,26 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+tools/chunk/$(am__dirstamp):
+	@$(MKDIR_P) tools/chunk
+	@: > tools/chunk/$(am__dirstamp)
+tools/chunk/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tools/chunk/$(DEPDIR)
+	@: > tools/chunk/$(DEPDIR)/$(am__dirstamp)
+tools/chunk/chunk-main.$(OBJEXT): tools/chunk/$(am__dirstamp) \
+	tools/chunk/$(DEPDIR)/$(am__dirstamp)
+tests/$(am__dirstamp):
+	@$(MKDIR_P) tests
+	@: > tests/$(am__dirstamp)
+tests/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tests/$(DEPDIR)
+	@: > tests/$(DEPDIR)/$(am__dirstamp)
+tests/chunk-test_common.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES) $(EXTRA_chunk_DEPENDENCIES) 
+	@rm -f chunk$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
 tools/frames/$(am__dirstamp):
 	@$(MKDIR_P) tools/frames
 	@: > tools/frames/$(am__dirstamp)
@@ -982,18 +1020,26 @@ tools/frames/$(DEPDIR)/$(am__dirstamp):
 	@: > tools/frames/$(DEPDIR)/$(am__dirstamp)
 tools/frames/frames-main.$(OBJEXT): tools/frames/$(am__dirstamp) \
 	tools/frames/$(DEPDIR)/$(am__dirstamp)
-tests/$(am__dirstamp):
-	@$(MKDIR_P) tests
-	@: > tests/$(am__dirstamp)
-tests/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) tests/$(DEPDIR)
-	@: > tests/$(DEPDIR)/$(am__dirstamp)
 tests/frames-test_common.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
 frames$(EXEEXT): $(frames_OBJECTS) $(frames_DEPENDENCIES) $(EXTRA_frames_DEPENDENCIES) 
 	@rm -f frames$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(frames_OBJECTS) $(frames_LDADD) $(LIBS)
+tools/psnr/$(am__dirstamp):
+	@$(MKDIR_P) tools/psnr
+	@: > tools/psnr/$(am__dirstamp)
+tools/psnr/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tools/psnr/$(DEPDIR)
+	@: > tools/psnr/$(DEPDIR)/$(am__dirstamp)
+tools/psnr/psnr-main.$(OBJEXT): tools/psnr/$(am__dirstamp) \
+	tools/psnr/$(DEPDIR)/$(am__dirstamp)
+tests/psnr-test_common.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+psnr$(EXEEXT): $(psnr_OBJECTS) $(psnr_DEPENDENCIES) $(EXTRA_psnr_DEPENDENCIES) 
+	@rm -f psnr$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(psnr_OBJECTS) $(psnr_LDADD) $(LIBS)
 tools/remux/$(am__dirstamp):
 	@$(MKDIR_P) tools/remux
 	@: > tools/remux/$(am__dirstamp)
@@ -1141,7 +1187,9 @@ mostlyclean-compile:
 	-rm -f sound/*.$(OBJEXT)
 	-rm -f sound/*.lo
 	-rm -f tests/*.$(OBJEXT)
+	-rm -f tools/chunk/*.$(OBJEXT)
 	-rm -f tools/frames/*.$(OBJEXT)
+	-rm -f tools/psnr/*.$(OBJEXT)
 	-rm -f tools/remux/*.$(OBJEXT)
 	-rm -f tools/stitch/*.$(OBJEXT)
 	-rm -f tools/thumbnails/*.$(OBJEXT)
@@ -1206,7 +1254,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@settings/$(DEPDIR)/libvireo_la-settings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sound/$(DEPDIR)/libvireo_la-pcm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sound/$(DEPDIR)/libvireo_la-sound.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/chunk-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/frames-test_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/psnr-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/remux-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/stitch-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/thumbnails-test_common.Po@am__quote@
@@ -1215,7 +1265,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/unchunk-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/validate-test_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/viddiff-test_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tools/chunk/$(DEPDIR)/chunk-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/frames/$(DEPDIR)/frames-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tools/psnr/$(DEPDIR)/psnr-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/remux/$(DEPDIR)/remux-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/stitch/$(DEPDIR)/stitch-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tools/thumbnails/$(DEPDIR)/thumbnails-main.Po@am__quote@
@@ -1625,6 +1677,34 @@ scala/jni/vireo/libvireo_la-util.lo: scala/jni/vireo/util.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libvireo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scala/jni/vireo/libvireo_la-util.lo `test -f 'scala/jni/vireo/util.cpp' || echo '$(srcdir)/'`scala/jni/vireo/util.cpp
 
+tools/chunk/chunk-main.o: tools/chunk/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/chunk/chunk-main.o -MD -MP -MF tools/chunk/$(DEPDIR)/chunk-main.Tpo -c -o tools/chunk/chunk-main.o `test -f 'tools/chunk/main.cpp' || echo '$(srcdir)/'`tools/chunk/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/chunk/$(DEPDIR)/chunk-main.Tpo tools/chunk/$(DEPDIR)/chunk-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/chunk/main.cpp' object='tools/chunk/chunk-main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/chunk/chunk-main.o `test -f 'tools/chunk/main.cpp' || echo '$(srcdir)/'`tools/chunk/main.cpp
+
+tools/chunk/chunk-main.obj: tools/chunk/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/chunk/chunk-main.obj -MD -MP -MF tools/chunk/$(DEPDIR)/chunk-main.Tpo -c -o tools/chunk/chunk-main.obj `if test -f 'tools/chunk/main.cpp'; then $(CYGPATH_W) 'tools/chunk/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/chunk/main.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/chunk/$(DEPDIR)/chunk-main.Tpo tools/chunk/$(DEPDIR)/chunk-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/chunk/main.cpp' object='tools/chunk/chunk-main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/chunk/chunk-main.obj `if test -f 'tools/chunk/main.cpp'; then $(CYGPATH_W) 'tools/chunk/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/chunk/main.cpp'; fi`
+
+tests/chunk-test_common.o: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/chunk-test_common.o -MD -MP -MF tests/$(DEPDIR)/chunk-test_common.Tpo -c -o tests/chunk-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/chunk-test_common.Tpo tests/$(DEPDIR)/chunk-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/chunk-test_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/chunk-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+
+tests/chunk-test_common.obj: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/chunk-test_common.obj -MD -MP -MF tests/$(DEPDIR)/chunk-test_common.Tpo -c -o tests/chunk-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/chunk-test_common.Tpo tests/$(DEPDIR)/chunk-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/chunk-test_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chunk_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/chunk-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
+
 tools/frames/frames-main.o: tools/frames/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/frames/frames-main.o -MD -MP -MF tools/frames/$(DEPDIR)/frames-main.Tpo -c -o tools/frames/frames-main.o `test -f 'tools/frames/main.cpp' || echo '$(srcdir)/'`tools/frames/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/frames/$(DEPDIR)/frames-main.Tpo tools/frames/$(DEPDIR)/frames-main.Po
@@ -1652,6 +1732,34 @@ tests/frames-test_common.obj: tests/test_common.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/frames-test_common.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(frames_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/frames-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
+
+tools/psnr/psnr-main.o: tools/psnr/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/psnr/psnr-main.o -MD -MP -MF tools/psnr/$(DEPDIR)/psnr-main.Tpo -c -o tools/psnr/psnr-main.o `test -f 'tools/psnr/main.cpp' || echo '$(srcdir)/'`tools/psnr/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/psnr/$(DEPDIR)/psnr-main.Tpo tools/psnr/$(DEPDIR)/psnr-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/psnr/main.cpp' object='tools/psnr/psnr-main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/psnr/psnr-main.o `test -f 'tools/psnr/main.cpp' || echo '$(srcdir)/'`tools/psnr/main.cpp
+
+tools/psnr/psnr-main.obj: tools/psnr/main.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/psnr/psnr-main.obj -MD -MP -MF tools/psnr/$(DEPDIR)/psnr-main.Tpo -c -o tools/psnr/psnr-main.obj `if test -f 'tools/psnr/main.cpp'; then $(CYGPATH_W) 'tools/psnr/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/psnr/main.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tools/psnr/$(DEPDIR)/psnr-main.Tpo tools/psnr/$(DEPDIR)/psnr-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tools/psnr/main.cpp' object='tools/psnr/psnr-main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tools/psnr/psnr-main.obj `if test -f 'tools/psnr/main.cpp'; then $(CYGPATH_W) 'tools/psnr/main.cpp'; else $(CYGPATH_W) '$(srcdir)/tools/psnr/main.cpp'; fi`
+
+tests/psnr-test_common.o: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/psnr-test_common.o -MD -MP -MF tests/$(DEPDIR)/psnr-test_common.Tpo -c -o tests/psnr-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/psnr-test_common.Tpo tests/$(DEPDIR)/psnr-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/psnr-test_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/psnr-test_common.o `test -f 'tests/test_common.cpp' || echo '$(srcdir)/'`tests/test_common.cpp
+
+tests/psnr-test_common.obj: tests/test_common.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/psnr-test_common.obj -MD -MP -MF tests/$(DEPDIR)/psnr-test_common.Tpo -c -o tests/psnr-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/psnr-test_common.Tpo tests/$(DEPDIR)/psnr-test_common.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/test_common.cpp' object='tests/psnr-test_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(psnr_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/psnr-test_common.obj `if test -f 'tests/test_common.cpp'; then $(CYGPATH_W) 'tests/test_common.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/test_common.cpp'; fi`
 
 tools/remux/remux-main.o: tools/remux/main.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(remux_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tools/remux/remux-main.o -MD -MP -MF tools/remux/$(DEPDIR)/remux-main.Tpo -c -o tools/remux/remux-main.o `test -f 'tools/remux/main.cpp' || echo '$(srcdir)/'`tools/remux/main.cpp
@@ -1901,6 +2009,27 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-pkgconfigDATA: $(pkgconfig_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgconfigdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkgconfigdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pkgconfigdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pkgconfigdir)" || exit $$?; \
+	done
+
+uninstall-pkgconfigDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(pkgconfigdir)'; $(am__uninstall_files_from_dir)
 install-nobase_pkgincludeHEADERS: $(nobase_pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(nobase_pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
@@ -2222,12 +2351,13 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) config.h
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS) \
+		config.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -2286,8 +2416,12 @@ distclean-generic:
 	-rm -f sound/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tests/$(am__dirstamp)
+	-rm -f tools/chunk/$(DEPDIR)/$(am__dirstamp)
+	-rm -f tools/chunk/$(am__dirstamp)
 	-rm -f tools/frames/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tools/frames/$(am__dirstamp)
+	-rm -f tools/psnr/$(DEPDIR)/$(am__dirstamp)
+	-rm -f tools/psnr/$(am__dirstamp)
 	-rm -f tools/remux/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tools/remux/$(am__dirstamp)
 	-rm -f tools/stitch/$(DEPDIR)/$(am__dirstamp)
@@ -2319,7 +2453,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf common/$(DEPDIR) decode/$(DEPDIR) demux/$(DEPDIR) encode/$(DEPDIR) error/$(DEPDIR) frame/$(DEPDIR) header/$(DEPDIR) internal/decode/$(DEPDIR) internal/demux/$(DEPDIR) mux/$(DEPDIR) scala/jni/common/$(DEPDIR) scala/jni/vireo/$(DEPDIR) settings/$(DEPDIR) sound/$(DEPDIR) tests/$(DEPDIR) tools/frames/$(DEPDIR) tools/remux/$(DEPDIR) tools/stitch/$(DEPDIR) tools/thumbnails/$(DEPDIR) tools/transcode/$(DEPDIR) tools/trim/$(DEPDIR) tools/unchunk/$(DEPDIR) tools/validate/$(DEPDIR) tools/viddiff/$(DEPDIR) transform/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) decode/$(DEPDIR) demux/$(DEPDIR) encode/$(DEPDIR) error/$(DEPDIR) frame/$(DEPDIR) header/$(DEPDIR) internal/decode/$(DEPDIR) internal/demux/$(DEPDIR) mux/$(DEPDIR) scala/jni/common/$(DEPDIR) scala/jni/vireo/$(DEPDIR) settings/$(DEPDIR) sound/$(DEPDIR) tests/$(DEPDIR) tools/chunk/$(DEPDIR) tools/frames/$(DEPDIR) tools/psnr/$(DEPDIR) tools/remux/$(DEPDIR) tools/stitch/$(DEPDIR) tools/thumbnails/$(DEPDIR) tools/transcode/$(DEPDIR) tools/trim/$(DEPDIR) tools/unchunk/$(DEPDIR) tools/validate/$(DEPDIR) tools/viddiff/$(DEPDIR) transform/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -2336,7 +2470,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-nobase_pkgincludeHEADERS
+install-data-am: install-nobase_pkgincludeHEADERS \
+	install-pkgconfigDATA
 
 install-dvi: install-dvi-recursive
 
@@ -2367,7 +2502,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf common/$(DEPDIR) decode/$(DEPDIR) demux/$(DEPDIR) encode/$(DEPDIR) error/$(DEPDIR) frame/$(DEPDIR) header/$(DEPDIR) internal/decode/$(DEPDIR) internal/demux/$(DEPDIR) mux/$(DEPDIR) scala/jni/common/$(DEPDIR) scala/jni/vireo/$(DEPDIR) settings/$(DEPDIR) sound/$(DEPDIR) tests/$(DEPDIR) tools/frames/$(DEPDIR) tools/remux/$(DEPDIR) tools/stitch/$(DEPDIR) tools/thumbnails/$(DEPDIR) tools/transcode/$(DEPDIR) tools/trim/$(DEPDIR) tools/unchunk/$(DEPDIR) tools/validate/$(DEPDIR) tools/viddiff/$(DEPDIR) transform/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) decode/$(DEPDIR) demux/$(DEPDIR) encode/$(DEPDIR) error/$(DEPDIR) frame/$(DEPDIR) header/$(DEPDIR) internal/decode/$(DEPDIR) internal/demux/$(DEPDIR) mux/$(DEPDIR) scala/jni/common/$(DEPDIR) scala/jni/vireo/$(DEPDIR) settings/$(DEPDIR) sound/$(DEPDIR) tests/$(DEPDIR) tools/chunk/$(DEPDIR) tools/frames/$(DEPDIR) tools/psnr/$(DEPDIR) tools/remux/$(DEPDIR) tools/stitch/$(DEPDIR) tools/thumbnails/$(DEPDIR) tools/transcode/$(DEPDIR) tools/trim/$(DEPDIR) tools/unchunk/$(DEPDIR) tools/validate/$(DEPDIR) tools/viddiff/$(DEPDIR) transform/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -2385,7 +2520,7 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
-	uninstall-nobase_pkgincludeHEADERS
+	uninstall-nobase_pkgincludeHEADERS uninstall-pkgconfigDATA
 
 .MAKE: $(am__recursive_targets) all install-am install-strip
 
@@ -2402,12 +2537,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLTLIBRARIES install-man \
 	install-nobase_pkgincludeHEADERS install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES uninstall-nobase_pkgincludeHEADERS
+	install-pkgconfigDATA install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
+	uninstall-nobase_pkgincludeHEADERS uninstall-pkgconfigDATA
 
 .PRECIOUS: Makefile
 

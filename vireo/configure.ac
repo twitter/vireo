@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_INIT([vireo], m4_esyscmd_s([grep -E 'VIREO_VERSION \"(.*)\"' version.h | cut -d\" -f2]), [vireo@twitter.com])
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIRS([../m4])
@@ -42,23 +42,32 @@ fi
 AM_CONDITIONAL([JAVA_HOME_SET], [test ! -z "$JAVA_HOME"])
 AM_CONDITIONAL([BUILD_SCALA], [test x${enable_scala} = xyes])
 
+# Handles GPL libraries
+AC_ARG_ENABLE([gpl],
+  [AS_HELP_STRING([--enable-gpl],
+                  [Enable components that depend on GPL libraries
+                  (Default is disabled.)])],
+  [],
+  [enable_gpl=no])
+
 # Checks for libraries.
 ## Required
 AC_CHECK_LIB([lsmash], [lsmash_free], [], [AC_MSG_ERROR(L-Smash is required. Instructions at https://github.com/twitter/vireo)])
 ## Optional
-AC_CHECK_LIB([avcodec], [av_init_packet])
-AC_CHECK_LIB([avformat], [av_add_index_entry])
-AC_CHECK_LIB([avutil], [av_asprintf])
 AC_CHECK_LIB([fdk-aac], [aacDecoder_Open])
 AC_CHECK_LIB([ogg], [ogg_packet_clear])
 AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([swscale], [swscale_version])
 AC_CHECK_LIB([vorbis], [vorbis_block_init])
 AC_CHECK_LIB([vorbisenc], [vorbis_encode_init])
 AC_CHECK_LIB([vpx], [vpx_free])
 AC_CHECK_LIB([webm], [_ZN8mkvmuxer10AudioTrackC1EPj])
-AC_CHECK_LIB([x264], [x264_free])
 AC_CHECK_LIB([z], [deflate])
+## Optional and if GPL enabled explicitly
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avcodec], [av_init_packet])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avformat], [av_add_index_entry])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([avutil], [av_asprintf])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([swscale], [swscale_version])], [no], [], [])
+AS_CASE(["$enable_gpl"], [yes], [AC_CHECK_LIB([x264], [x264_free])], [no], [], [])
 
 # Conditionals for Makefile.am
 AM_CONDITIONAL([USE_LIBWEBM], [test `grep -c HAVE_LIBWEBM confdefs.h` -eq 1])
@@ -96,4 +105,5 @@ AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 AC_CONFIG_SUBDIRS([../imagecore])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([vireo.pc])
 AC_OUTPUT
