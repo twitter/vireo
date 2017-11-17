@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: vireo
+Description: A versatile media processing library
+URL: https://github.com/twitter/vireo
+Version: @VERSION@
+
+Cflags: -I${includedir}
+Libs: -L${libdir} -lvireo

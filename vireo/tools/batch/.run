@@ -1,0 +1,4 @@
+#! /bin/bash -e
+
+RUN='echo "Running '${TOOL_NAME}' on : \"{}\"" ; '${COMMAND}' ; echo "==="'
+find "${IN_FOLDER}" \( -iname '*.mp4' -o -iname '*.mov' \) -exec sh -c "${RUN}" 2>&1 \;
