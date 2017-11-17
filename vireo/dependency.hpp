@@ -75,7 +75,4 @@ using has_swscale = std::true_type;
 using has_swscale = std::false_type;
 #endif
 
-
-
-
 }
