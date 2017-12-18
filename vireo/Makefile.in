@@ -119,7 +119,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../m4/libtool.m4 \
 	$(top_srcdir)/../m4/ltsugar.m4 \
 	$(top_srcdir)/../m4/ltversion.m4 \
 	$(top_srcdir)/../m4/lt~obsolete.m4 \
-	$(top_srcdir)/../m4/m4-ax_check_compile_flag.m4 \
+	$(top_srcdir)/../m4/m4_ax_check_compile_flag.m4 \
 	$(top_srcdir)/../m4/m4_ax_check_java_home.m4 \
 	$(top_srcdir)/../m4/m4_ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/../m4/m4_ax_cxx_compile_stdcxx_14.m4 \
@@ -629,7 +629,7 @@ libvireo_la_SOURCES = common/bitreader.cpp common/data.cpp \
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
 nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h \
-	dependency.hpp base_h.h types.h version.h common/bitreader.h \
+	dependency.hpp types.h version.h common/bitreader.h \
 	common/data.h common/editbox.h common/enum.hpp common/math.h \
 	common/path.h common/reader.h common/ref.h common/security.h \
 	decode/audio.h decode/types.h decode/video.h demux/movie.h \
