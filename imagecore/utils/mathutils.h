@@ -23,6 +23,7 @@
  */
 
 #pragma once
+#include <climits>
 
 #include "imagecore/imagecore.h"
 
@@ -111,5 +112,8 @@ inline void swap(unsigned int& a, unsigned int& b)
 
 inline unsigned int div2_round(unsigned int a)
 {
-	return (a + 1) / 2;
+	if (a == UINT_MAX)
+		return (a - 1) / 2 + 1;
+	else
+		return (a + 1) / 2;
 }
