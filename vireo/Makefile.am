@@ -104,7 +104,7 @@ libvireo_la_CPPFLAGS += $(JNI_CPPFLAGS)
 endif
 endif
 
-nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h dependency.hpp types.h version.h
+nobase_pkginclude_HEADERS = base_cpp.h base_h.h config.h constants.h dependency.hpp types.h version.h
 nobase_pkginclude_HEADERS += common/bitreader.h common/data.h common/editbox.h common/enum.hpp common/math.h common/path.h common/reader.h common/ref.h common/security.h
 nobase_pkginclude_HEADERS += decode/audio.h decode/types.h decode/video.h
 nobase_pkginclude_HEADERS += demux/movie.h

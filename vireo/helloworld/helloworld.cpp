@@ -24,6 +24,7 @@
 
 #include <iostream>
 
+#include "vireo/config.h"
 #include "vireo/demux/movie.h"
 #include "vireo/decode/video.h"
 #include "vireo/encode/h264.h"
@@ -67,6 +68,9 @@ void keyframes(string in, string out) {
   cout << "Done" << endl;
 }
 
+#ifdef HAVE_LIBAVCODEC
+#ifdef HAVE_LIBX264
+#define TRANSCODE_SUPPORTED
 /*
  * Simple example for transcoding an input file to mp4
  * This function requires vireo to be built with --enable-gpl flag
@@ -84,10 +88,14 @@ void transcode(string in, string out) {
   util::save(out, binary);
   cout << "Done" << endl;
 }
+#endif
+#endif
 
 int main() {
   remux("helloworld.mp4", "helloworld-remuxed.mp4");
   keyframes("helloworld.mp4", "helloworld-keyframes.mp4");
+#if TRANSCODE_SUPPORTED
   transcode("helloworld.mp4", "helloworld-transcoded.mp4");
+#endif
   return 0;
 }
