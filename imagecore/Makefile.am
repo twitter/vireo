@@ -25,5 +25,5 @@ endif
 
 nobase_pkginclude_HEADERS = imagecore.h
 nobase_pkginclude_HEADERS += formats/exif/exifcommon.h formats/exif/exifreader.h formats/exif/exifwriter.h formats/format.h formats/reader.h formats/writer.h image/colorpalette.h
-nobase_pkginclude_HEADERS +=  image/colorspace.h image/grayscale.h image/image.h image/interleaved.h image/kernel.h image/resizecrop.h image/rgba.h image/tiledresize.h image/yuv.h image/yuv_semiplanar.h
+nobase_pkginclude_HEADERS += image/colorspace.h image/grayscale.h image/image.h image/interleaved.h image/kernel.h image/resizecrop.h image/rgba.h image/tiledresize.h image/yuv.h image/yuv_semiplanar.h
 nobase_pkginclude_HEADERS += utils/endianutils.h utils/mathtypes.h utils/mathutils.h utils/memorystream.h utils/securemath.h

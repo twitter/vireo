@@ -628,7 +628,7 @@ libvireo_la_SOURCES = common/bitreader.cpp common/data.cpp \
 	$(am__append_10)
 libvireo_la_LDFLAGS = $(LIBS)
 libvireo_la_LIBADD = ../imagecore/libimagecore.la
-nobase_pkginclude_HEADERS = base_cpp.h base_h.h constants.h \
+nobase_pkginclude_HEADERS = base_cpp.h base_h.h config.h constants.h \
 	dependency.hpp types.h version.h common/bitreader.h \
 	common/data.h common/editbox.h common/enum.hpp common/math.h \
 	common/path.h common/reader.h common/ref.h common/security.h \
