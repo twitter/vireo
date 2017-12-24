@@ -22,9 +22,6 @@
  * SOFTWARE.
  */
 
-extern "C" {
-#include "libavformat/avformat.h"
-}
 #include "fdk-aac/FDK_audio.h"
 #include "fdk-aac/aacdecoder_lib.h"
 #include "vireo/base_cpp.h"
