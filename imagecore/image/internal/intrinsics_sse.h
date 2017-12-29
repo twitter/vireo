@@ -77,7 +77,7 @@
 #include <cpuid.h>
 
 
-// note, this doesnt do a full transpose, the 2 middle 32 bit elements still need to be swapped
+// note, this doesn't do a full transpose, the 2 middle 32 bit elements still need to be swapped
 #define vec_transpose_int8(r0, r1, r2, r3, c0, c1, c2, c3) \
 { \
 vSInt8 u0 = v128_unpacklo_int8(r0, r1); \
