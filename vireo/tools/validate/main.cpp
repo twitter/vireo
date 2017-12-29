@@ -267,7 +267,7 @@ int main(int argc, const char* argv[]) {
     string err = string(e.what());
     cout << "fail: " << err << endl;
     if (err.find("!intra_decode_refresh") != std::string::npos) {  // TODO: remove once MEDIASERV-4386 is resolved
-      return 2;  // return a special error code for !intra_decode_refresh to track occurence of l-smash bug (MEDIASERV-4386)
+      return 2;  // return a special error code for !intra_decode_refresh to track occurrence of l-smash bug (MEDIASERV-4386)
     }
     return 1;
   }
