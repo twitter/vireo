@@ -763,7 +763,7 @@ void adaptiveSeperable8_12x4(const int32_t* sampleStarts, const FilterKernelAdap
 			vSInt32 result;
 
 			// Transpose the rows so each multiply/add is operating on 4 of the same element, 1 from each row
-			// This is more efficient than treating each row seperately and needing to do horizontal addition within the vectors.
+			// This is more efficient than treating each row separately and needing to do horizontal addition within the vectors.
 			// The coefficients are replicated 4 times in each vector, so we have 12 vectors for 12 coefficients.
 			//  i.e.
 			//  (A0 A1 A2 A3) dot (X0 X1 X2 X3) = (Ar 0 0 0)
@@ -1097,7 +1097,7 @@ void adaptiveSeperable8_12(const FilterKernelAdaptive* kernel, const uint8_t* __
 			vSInt32 result;
 
 			// Transpose the rows so each multiply/add is operating on 4 of the same element, 1 from each row
-			// This is more efficient than treating each row seperately and needing to do horizontal addition within the vectors.
+			// This is more efficient than treating each row separately and needing to do horizontal addition within the vectors.
 			// The coefficients are replicated 4 times in each vector, so we have 12 vectors for 12 coefficients.
 			//  i.e.
 			//  (A0 A1 A2 A3) dot (X0 X1 X2 X3) = (Ar 0 0 0)
