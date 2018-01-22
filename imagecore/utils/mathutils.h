@@ -24,9 +24,8 @@
 
 #pragma once
 
-#include <climits>
-
 #include "imagecore/imagecore.h"
+#include <climits>
 
 inline float lerp(float a, float b, float v)
 {
