@@ -25,6 +25,7 @@
 #pragma once
 
 #include "imagecore/imagecore.h"
+#include <climits>
 
 inline float lerp(float a, float b, float v)
 {
@@ -111,5 +112,9 @@ inline void swap(unsigned int& a, unsigned int& b)
 
 inline unsigned int div2_round(unsigned int a)
 {
-	return (a + 1) / 2;
+	if(a == UINT_MAX) {
+		return (a - 1) / 2 + 1;
+	} else {
+		return (a + 1) / 2;
+	}
 }
