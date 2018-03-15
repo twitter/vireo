@@ -94,7 +94,7 @@ void transcode(string in, string out) {
 int main() {
   remux("helloworld.mp4", "helloworld-remuxed.mp4");
   keyframes("helloworld.mp4", "helloworld-keyframes.mp4");
-#if TRANSCODE_SUPPORTED
+#ifdef TRANSCODE_SUPPORTED
   transcode("helloworld.mp4", "helloworld-transcoded.mp4");
 #endif
   return 0;
