@@ -146,7 +146,9 @@ void transcode(string in, string out) {
   // setup the demux -> decode -> encode -> mux pipeline
   demux::Movie movie(in);
   decode::Video decoder(movie.video_track);
-  encode::H264 encoder(decoder, 30.0f, 3, movie.video_track.fps());
+  encode::H264 encoder(decoder,
+                       30.0f, 3,
+                       movie.video_track.fps());
   mux::MP4 muxer(encoder);
   // nothing is executed until muxer() is called
   auto binary = muxer();
