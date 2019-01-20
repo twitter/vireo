@@ -86,8 +86,8 @@ bool ImageRGBA::scanAlpha()
 	unsigned int width = m_ImagePlane->getWidth();
 	unsigned int height = m_ImagePlane->getHeight();
 	uint8_t* buffer = m_ImagePlane->lockRect(width, height, framePitch);
-	for( unsigned int y = 0; y < height; y++ ) {
-		for( unsigned int x = 0; x < width; x++ ) {
+	for( unsigned int y = 0; y < height; ++y ) {
+		for( unsigned int x = 0; x < width; ++x ) {
 			const RGBA* c = (RGBA*)(&buffer[y * framePitch + x * 4]);
 			if( c->a != 255 )
 			{

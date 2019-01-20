@@ -204,15 +204,15 @@ void ImageYUV::applyLookupTable(ImageYUV* destImage, uint8_t* tableY, uint8_t* t
 	uint8_t* destBufferY = destImage->getPlaneY()->lockRect(widthY, heightY, destPitchY);
 
 	if( destPitchY == pitchY ) {
-		for( unsigned int y = 0; y < heightY; y++ ) {
-			for( unsigned int x = 0; x < widthY; x++ ) {
+		for( unsigned int y = 0; y < heightY; ++y ) {
+			for( unsigned int x = 0; x < widthY; ++x ) {
 				unsigned int offset = (y * pitchY) + x;
 				destBufferY[offset] = tableY[bufferY[offset]];
 			}
 		}
 	} else {
-		for( unsigned int y = 0; y < heightY; y++ ) {
-			for( unsigned int x = 0; x < widthY; x++ ) {
+		for( unsigned int y = 0; y < heightY; ++y ) {
+			for( unsigned int x = 0; x < widthY; ++x ) {
 				destBufferY[(y * destPitchY) + x] = tableY[bufferY[(y * pitchY) + x]];
 			}
 		}
@@ -228,16 +228,16 @@ void ImageYUV::applyLookupTable(ImageYUV* destImage, uint8_t* tableY, uint8_t* t
 	uint8_t* destBufferV = destImage->getPlaneV()->lockRect(widthUV, heightUV, destPitchUV);
 
 	if( destPitchY == pitchY ) {
-		for( unsigned int y = 0; y < heightUV; y++ ) {
-			for( unsigned int x = 0; x < widthUV; x++ ) {
+		for( unsigned int y = 0; y < heightUV; ++y ) {
+			for( unsigned int x = 0; x < widthUV; ++x ) {
 				unsigned int offset = (y * pitchUV) + x;
 				destBufferU[offset] = tableUV[bufferU[offset]];
 				destBufferV[offset] = tableUV[bufferV[offset]];
 			}
 		}
 	} else {
-		for( unsigned int y = 0; y < heightUV; y++ ) {
-			for( unsigned int x = 0; x < widthUV; x++ ) {
+		for( unsigned int y = 0; y < heightUV; ++y ) {
+			for( unsigned int x = 0; x < widthUV; ++x ) {
 				unsigned int inOffset = (y * pitchUV) + x;
 				unsigned int outOffset = (y * destPitchUV) + x;
 				destBufferU[outOffset] = tableUV[bufferU[inOffset]];
@@ -258,7 +258,7 @@ void ImageYUV::compressRange(ImageYUV* destImage)
 	static uint8_t invTableY[255];
 	static uint8_t invTableUV[255];
 	if( !didInitTable ) {
-		for( int i = 0; i < 256; i++ ) {
+		for( int i = 0; i < 256; ++i ) {
 			invTableY[i] = clamp(0, 255, floor(0.5f + lerp(16.0f, 235.0f, i / 255.0f)));
 			invTableUV[i] = clamp(0, 255, floor(0.5f + lerp(16.0f, 240.0f, i / 255.0f)));
 		}
@@ -279,7 +279,7 @@ void ImageYUV::expandRange(ImageYUV *destImage)
 	static uint8_t tableY[255];
 	static uint8_t tableUV[255];
 	if( !didInitTable ) {
-		for( int i = 0; i < 256; i++ ) {
+		for( int i = 0; i < 256; ++i ) {
 			tableY[i] = clamp(0, 255, floor(0.5f + step(16.0f, 235.0f, i) * 255.0f));
 			tableUV[i] = clamp(0, 255, floor(0.5f + step(16.0f, 240.0f, i) * 255.0f));
 		}

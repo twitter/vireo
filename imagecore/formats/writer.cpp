@@ -45,7 +45,7 @@ int ImageWriter::registerWriter(ImageWriter::Factory* factory)
 {
 	ASSERT(s_NumWriterFactories < MAX_FORMATS);
 	s_WriterFactories[s_NumWriterFactories] = factory;
-	s_NumWriterFactories++;
+	++s_NumWriterFactories;
 	return s_NumWriterFactories;
 }
 
@@ -59,7 +59,7 @@ EImageFormat ImageWriter::formatFromExtension(const char* filename, EImageFormat
 			lastDotStr = nextDotStr + 1;
 		}
 	} while (nextDotStr != NULL);
-	for( unsigned int i = 0; i < s_NumWriterFactories; i++ ) {
+	for( unsigned int i = 0; i < s_NumWriterFactories; ++i ) {
 		if( s_WriterFactories[i]->matchesExtension(lastDotStr) ) {
 			return s_WriterFactories[i]->getFormat();
 		}
@@ -89,14 +89,14 @@ ImageWriter* ImageWriter::createWithFormat(EImageFormat imageFormat, ImageWriter
 ImageWriter::Factory* ImageWriter::factoryForFormat(EImageFormat imageFormat)
 {
 	// First try to find an exact match.
-	for( unsigned int i = 0; i < s_NumWriterFactories; i++ ) {
+	for( unsigned int i = 0; i < s_NumWriterFactories; ++i ) {
 		if( s_WriterFactories[i]->getFormat() == imageFormat ) {
 			return s_WriterFactories[i];
 		}
 	}
 
 	// Then try to find a fallback.
-	for( unsigned int i = 0; i < s_NumWriterFactories; i++ ) {
+	for( unsigned int i = 0; i < s_NumWriterFactories; ++i ) {
 		if( s_WriterFactories[i]->appropriateForInputFormat(imageFormat) ) {
 			return s_WriterFactories[i];
 		}

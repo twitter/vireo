@@ -54,7 +54,7 @@ ResizeCropOperation::ResizeCropOperation()
 
 ResizeCropOperation::~ResizeCropOperation()
 {
-	for( unsigned int i = 0; i < 2; i++ ) {
+	for( unsigned int i = 0; i < 2; ++i ) {
 		if( m_FilteredImage[i] != NULL ) {
 			delete m_FilteredImage[i];
 			m_FilteredImage[i] = NULL;
@@ -244,8 +244,8 @@ int ResizeCropOperation::fillBackground()
 		unsigned int width = image->getWidth();
 		unsigned int height = image->getHeight();
 		uint8_t* buffer = image->lockRect(width, height, framePitch);
-		for( unsigned int y = 0; y < height; y++ ) {
-			for( unsigned int x = 0; x < width; x++ ) {
+		for( unsigned int y = 0; y < height; ++y ) {
+			for( unsigned int x = 0; x < width; ++x ) {
 				RGBA* rgba = (RGBA*)(&buffer[y * framePitch + x * 4]);
 				if( rgba->a == 0 ) {
 					*rgba = ColorSpace::floatToByte(fillColor);

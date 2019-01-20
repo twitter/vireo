@@ -157,7 +157,7 @@ void FilterKernel::generateFixedPoint(EFilterType type)
 	if(type == kFilterType_Linear) {
 		m_TableBilinear = new uint8_t[tableSize];
 		// Convert to fixed point.
-		for( unsigned int i = 0; i < tableSize; i++ ) {
+		for( unsigned int i = 0; i < tableSize; ++i ) {
 			m_TableBilinear[i] = (int)(m_Table[i] * 255.0f);
 		}
 	} else {
@@ -165,7 +165,7 @@ void FilterKernel::generateFixedPoint(EFilterType type)
 		m_TableFixedPoint4 = new int32_t[SafeUMul(tableSize, 4U)];
 		// Convert to fixed point.
 		// This is duplicated 4 times to save a few SSE instructions.
-		for( unsigned int i = 0; i < tableSize; i++ ) {
+		for( unsigned int i = 0; i < tableSize; ++i ) {
 			int value = (int)(m_Table[i] * 65536.0f);
 			m_TableFixedPoint[i] = value;
 			m_TableFixedPoint4[i * 4 + 0] = value;
@@ -210,7 +210,7 @@ FilterKernelAdaptive::FilterKernelAdaptive(EFilterType type, unsigned int kernel
 	FilterFunction filterFunction = s_FilterFunctionsAdaptive[type];
 	int maxSamples = 0;
 	if (type == kFilterType_Linear) {
-		for( unsigned int i = 0; i < outSize; i++ ) {
+		for( unsigned int i = 0; i < outSize; ++i ) {
 			float sample = (i + 0.5f) * invRatio;
 			float w0 = sample - floorf(sample);
 			m_Table[i * kernelSize + 0] = 1.0f - w0;
@@ -219,24 +219,24 @@ FilterKernelAdaptive::FilterKernelAdaptive(EFilterType type, unsigned int kernel
 		m_WindowWidth = 0.5f;
 		maxSamples = 2;
 	} else {
-		for( unsigned int i = 0; i < outSize; i++ ) {
+		for( unsigned int i = 0; i < outSize; ++i ) {
 			float sample = (i + 0.5f) * invRatio - 0.00001f;
 			int start = sample - windowWidth + 0.5f;
 			int end = sample + windowWidth + 0.5f;
 			int numSamples = end - start;
 			maxSamples = max(maxSamples, numSamples);
 			float sum = 0.0f;
-			for( int k = 0; k < numSamples; k++ ) {
+			for( int k = 0; k < numSamples; ++k ) {
 				float samplePos = ratio * ((float)(start + k) - sample + 0.5f);
 				float weight = filterFunction(samplePos, invFilterScale);
 				m_Table[i * kernelSize + k] = weight;
 				sum += weight;
 			}
-			for( unsigned int k = numSamples; k < kernelSize; k++ ) {
+			for( unsigned int k = numSamples; k < kernelSize; ++k ) {
 				m_Table[i * kernelSize + k] = 0.0f;
 			}
 			float invSum = 1.0f / sum;
-			for (int k = 0; k < numSamples; k++) {
+			for (int k = 0; k < numSamples; ++k) {
 				m_Table[i * kernelSize + k] *= invSum;
 			}
 		}
@@ -256,7 +256,7 @@ FilterKernelFixed::FilterKernelFixed(EFilterType type, unsigned int inSize, unsi
 	m_WindowWidth = 4;
 	FilterFunction filterFunction = s_FilterFunctionsFixed[type];
 	m_SampleRatio = (float)inSize / (float)outSize;
-	for( unsigned int i = 0; i < outSize; i++ ) {
+	for( unsigned int i = 0; i < outSize; ++i ) {
 		float inP = fmaxf(0.0f, ((float)(i + 0.5f) * m_SampleRatio) - 0.5f);
 		float frP = inP - floorf(inP);
 		float a = filterFunction(frP + 1.0f, 4);

@@ -43,13 +43,13 @@ int ImageReader::registerReader(ImageReader::Factory* factory)
 {
 	ASSERT(s_NumReaderFactories < MAX_FORMATS);
 	s_ReaderFactories[s_NumReaderFactories] = factory;
-	s_NumReaderFactories++;
+	++s_NumReaderFactories;
 	return s_NumReaderFactories;
 }
 
 ImageReader* ImageReader::createFromSignature(const uint8_t* sig)
 {
-	for( unsigned int i = 0; i < s_NumReaderFactories; i++ ) {
+	for( unsigned int i = 0; i < s_NumReaderFactories; ++i ) {
 		if( s_ReaderFactories[i]->matchesSignature(sig, SIGNATURE_MAX_SIZE) ) {
 			return s_ReaderFactories[i]->create();
 		}
@@ -243,7 +243,7 @@ bool ImageReader::FileStorage::peekSignature(uint8_t* signature)
 			return true;
 		} else {
 			// Can't seek back, probably stdin. Put the signature back into the stream buffer.
-			for( int i = 0; i < SIGNATURE_MAX_SIZE; i++ ) {
+			for( int i = 0; i < SIGNATURE_MAX_SIZE; ++i ) {
 				int b = fgetc(m_File);
 				if( b != EOF ) {
 					signature[i] = b;
@@ -251,7 +251,7 @@ bool ImageReader::FileStorage::peekSignature(uint8_t* signature)
 					return false;
 				}
 			}
-			for( int i = SIGNATURE_MAX_SIZE - 1; i >= 0; i-- ) {
+			for( int i = SIGNATURE_MAX_SIZE - 1; i >= 0; --i ) {
 				ungetc(signature[i], m_File);
 			}
 		}

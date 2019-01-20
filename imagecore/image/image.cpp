@@ -311,8 +311,8 @@ IMAGEPLANE(void)::fillPadding(EEdgeMask edgeMask)
 		typename primType::asType* sample = (typename primType::asType*)lockRect(m_Width, m_Height, pitch);
 		int componentPitch = pitch / Channels;
 		if( (edgeMask & kEdge_Left) != 0 && (m_PadRegionDirty & kEdge_Left) != 0 ) {
-			for( int y = 0; y < m_Height; y++ ) {
-				for( int x = -m_Padding; x < 0; x++ ) {
+			for( int y = 0; y < m_Height; ++y ) {
+				for( int x = -m_Padding; x < 0; ++x ) {
 					sample[y * componentPitch + x] = sample[y * componentPitch + 0];
 				}
 			}
@@ -320,8 +320,8 @@ IMAGEPLANE(void)::fillPadding(EEdgeMask edgeMask)
 		}
 		if( (edgeMask & kEdge_Right) != 0 && (m_PadRegionDirty & kEdge_Right) != 0 ) {
 			unsigned int paddedWidth = m_Width + m_Padding;
-			for( int y = 0; y < m_Height; y++ ) {
-				for( int x = m_Width; x < paddedWidth; x++ ) {
+			for( int y = 0; y < m_Height; ++y ) {
+				for( int x = m_Width; x < paddedWidth; ++x ) {
 					sample[y * componentPitch + x] = sample[y * componentPitch + (m_Width - 1)];
 				}
 			}
@@ -329,7 +329,7 @@ IMAGEPLANE(void)::fillPadding(EEdgeMask edgeMask)
 		}
 		if( (edgeMask & kEdge_Top) != 0 && (m_PadRegionDirty & kEdge_Top) != 0 ) {
 			unsigned int twicePaddedWidth = m_Width + m_Padding * 2;
-			for( int y = -m_Padding; y < 0; y++ ) {
+			for( int y = -m_Padding; y < 0; ++y ) {
 				memcpy(sample + y * componentPitch - m_Padding, sample + 0 * componentPitch - m_Padding, twicePaddedWidth * Channels);
 			}
 			m_PadRegionDirty &= ~kEdge_Top;
@@ -337,7 +337,7 @@ IMAGEPLANE(void)::fillPadding(EEdgeMask edgeMask)
 		if( (edgeMask & kEdge_Bottom) != 0 && (m_PadRegionDirty & kEdge_Bottom) != 0 ) {
 			unsigned int paddedHeight = m_Height + m_Padding;
 			unsigned int twicePaddedWidth = m_Width + m_Padding * 2;
-			for( int y = m_Height; y < paddedHeight; y++ ) {
+			for( int y = m_Height; y < paddedHeight; ++y ) {
 				memcpy(sample + y * componentPitch - m_Padding, sample + (m_Height - 1) * componentPitch - m_Padding, twicePaddedWidth * Channels);
 			}
 			m_PadRegionDirty &= ~kEdge_Bottom;
@@ -526,8 +526,8 @@ IMAGEPLANE(void)::clearRect(unsigned int sx, unsigned int sy, unsigned int w, un
 {
 	unsigned int destPitch = 0;
 	uint8_t* destBuffer = lockRect(sx, sy, w, h, destPitch);
-	for( unsigned int y = 0; y < h; y++ ) {
-		for( unsigned int x = 0; x < w; x++ ) {
+	for( unsigned int y = 0; y < h; ++y ) {
+		for( unsigned int x = 0; x < w; ++x ) {
 			unsigned int outIndex = y * destPitch + x * Channels;
 			*(typename primType::asType*)&destBuffer[outIndex + 0] = component;
 		}
@@ -549,7 +549,7 @@ IMAGEPLANE(void)::copyRect(ImagePlane<Channels>* dest, unsigned int sourceX, uns
 	uint8_t* sourceBuffer = lockRect(sourceX, sourceY, width, height, sourcePitch);
 	unsigned int destPitch = 0;
 	uint8_t* destBuffer = dest->lockRect(destX, destY, width, height, destPitch);
-	for( unsigned int y = 0; y < height; y++ ) {
+	for( unsigned int y = 0; y < height; ++y ) {
 		memcpy(destBuffer + y * destPitch, sourceBuffer + y * sourcePitch, width * Channels);
 	}
 }

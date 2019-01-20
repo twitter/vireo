@@ -78,8 +78,8 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 
 	START_CLOCK(ColorConversionHistogram);
 
-	for( unsigned int y = 0; y < height; y++ ) {
-		for( unsigned int x = 0; x < width; x++ ) {
+	for( unsigned int y = 0; y < height; ++y ) {
+		for( unsigned int x = 0; x < width; ++x ) {
 			const RGBA* rgba = (RGBA*)(&buffer[y * framePitch + x * 4]);
 			if (useHsv) {
 				floatImage[y * width + x] = ColorSpace::srgbToHsv(ColorSpace::byteToFloat(*rgba));
@@ -108,17 +108,17 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 	std::vector<int> vAreaMaxY;
 	std::vector<int> vAreaMaxZ;
 
-	for( int i = 0; i < numColors; i++ ) {
+	for( int i = 0; i < numColors; ++i ) {
 		int areaMaxX = 0;
 		int areaMaxY = 0;
 		int areaMaxZ = 0;
 		float maxAreaSum = 0.0f;
 
-		for( int x = 0; x < kHistSize; x++ ) {
-			for( int y = 0; y < kHistSize; y++ ) {
-				for( int z = 0; z < kHistSize; z++ ) {
+		for( int x = 0; x < kHistSize; ++x ) {
+			for( int y = 0; y < kHistSize; ++y ) {
+				for( int z = 0; z < kHistSize; ++z ) {
 					float sum = 0;
-					for( int sx = -searchSizeX; sx <= searchSizeX; sx++ ) {
+					for( int sx = -searchSizeX; sx <= searchSizeX; ++sx ) {
 						int wrappedX = x + sx;
 						if (useHsv) {
 							// Hue in HSV is circular, so we wrap instead of clamp.
@@ -128,9 +128,9 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 								wrappedX = kHistSize + wrappedX - 1;
 							}
 						}
-						for( int sy = -searchSizeY; sy <= searchSizeY; sy++ ) {
+						for( int sy = -searchSizeY; sy <= searchSizeY; ++sy ) {
 							int index = INDEX_HIST(wrappedX, y + sy, z);
-							for( int sz = -searchSizeZ; sz <= searchSizeZ; sz++ ) {
+							for( int sz = -searchSizeZ; sz <= searchSizeZ; ++sz ) {
 								sum += histogram[index + sz];
 							}
 						}
@@ -150,7 +150,7 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 			vAreaMaxY.push_back(areaMaxY);
 			vAreaMaxZ.push_back(areaMaxZ);
 			if( numColors > 1 ) {
-				for( int sx = -searchSizeX; sx <= searchSizeX; sx++ ) {
+				for( int sx = -searchSizeX; sx <= searchSizeX; ++sx ) {
 					int wrappedX = areaMaxX + sx;
 					if( useHsv ) {
 						// Hue in HSV is circular, so we wrap instead of clamp.
@@ -160,9 +160,9 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 							wrappedX = kHistSize + wrappedX - 1;
 						}
 					}
-					for( int sy = -searchSizeY; sy <= searchSizeY; sy++ ) {
+					for( int sy = -searchSizeY; sy <= searchSizeY; ++sy ) {
 						int index = INDEX_HIST(wrappedX, areaMaxY + sy, areaMaxZ);
-						for( int sz = -searchSizeZ; sz <= searchSizeZ; sz++ ) {
+						for( int sz = -searchSizeZ; sz <= searchSizeZ; ++sz ) {
 							histogram[index + sz] = -fabs(histogram[index + sz]);
 						}
 					}
@@ -180,7 +180,7 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 	WeightedColor* weightedColors = (WeightedColor*)malloc(numColors * sizeof(WeightedColor));
 
 	SECURE_ASSERT(vAreaMaxX.size() == vAreaMaxY.size() && vAreaMaxX.size() == vAreaMaxZ.size());
-	for( int m = 0; m < min((int)vAreaMaxX.size(), numColors); m++ ) {
+	for( int m = 0; m < min((int)vAreaMaxX.size(), numColors); ++m ) {
 		int areaMaxX = vAreaMaxX[m];
 		int areaMaxY = vAreaMaxY[m];
 		int areaMaxZ = vAreaMaxZ[m];
@@ -192,8 +192,8 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 		int gAvg = 0;
 		int bAvg = 0;
 		int mmax = 0;
-		for( unsigned int y = 0; y < height; y++ ) {
-			for( unsigned int x = 0; x < width; x++ ) {
+		for( unsigned int y = 0; y < height; ++y ) {
+			for( unsigned int x = 0; x < width; ++x ) {
 				const RGBA* rgba = (RGBA*)(&buffer[y * framePitch + x * 4]);
 				const float3& c = floatImage[y * width + x];
 				int hx = clamp(0, kHistSize - 1, (int)(c.x * (float)kHistSize));
@@ -208,7 +208,7 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 					gDim.push_back(rgba->g);
 					bDim.push_back(rgba->b);
 					colors.push_back(*rgba);
-					mmax++;
+					++mmax;
 				}
 			}
 		}
@@ -227,7 +227,7 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 			RGBA outColor(0, 0, 0, 255);
 
 			int closestColorDist = 10000000;
-			for( unsigned i = 0; i < colors.size(); i++ ) {
+			for( unsigned i = 0; i < colors.size(); ++i ) {
 				const RGBA& c = colors.at(i);
 				float dr = c.r - medianR;
 				float dg = c.g - medianG;
@@ -242,13 +242,13 @@ static int computeHistogram(ImageRGBA* frameImage, RGBA* ccolors, double* colorP
 					}
 				}
 			}
-			numOutColors++;
+			++numOutColors;
 		}
 	}
 
 	std::sort(weightedColors, weightedColors + numOutColors);
 
-	for( int i = 0; i < numOutColors; i++ ) {
+	for( int i = 0; i < numOutColors; ++i ) {
 		ccolors[i] = weightedColors[numOutColors - i - 1].color;
 		colorPct[i] = weightedColors[numOutColors - i - 1].pct;
 	}
@@ -294,16 +294,17 @@ struct colorSample {
 
 static vector<colorSample> initializeCentroids(unsigned int numCluster, vector<colorSample>& samples) {
 	vector<colorSample> centroids;
+	centroids.reserve(numCluster); // because we know how many elements get put in.
 	uint64_t size = samples.size();
 	// initialize using random samples in the image
 	srand(817504253); // feed a fixed prime seed for deterministic results and easy testing
-	for( unsigned int k = 0; k < numCluster; k++ ) {
+	for( unsigned int k = 0; k < numCluster; ++k ) {
 		uint64_t randomIdx = rand() % size;
 		unsigned int count = 0;
-		for( unsigned int i = 0; i < k; i++ ) {
+		for( unsigned int i = 0; i < k; ++i ) {
 			while( samples[randomIdx].rgba == centroids[i].rgba && count < 10 ) { // get rid of same colors as initial centroids, but do not try too hard
 				randomIdx = rand() % size;
-				count++;
+				++count;
 			}
 		}
 		samples[randomIdx].label = k;
@@ -348,7 +349,7 @@ static vector<colorSample> getCentroids(vector<colorSample> samples, unsigned in
 	}
 
 	vector<colorSample> centroids;
-	for( unsigned int k = 0; k < numCluster; k++ ) {
+	for( unsigned int k = 0; k < numCluster; ++k ) {
 		float3 lab(sums[k].x / clusterSize[k], sums[k].y / clusterSize[k], sums[k].z / clusterSize[k]);
 		RGBA rgba = ColorSpace::floatToByte(ColorSpace::labToSrgb(lab));
 		centroids.push_back(colorSample(rgba, lab, k, 0));
@@ -366,8 +367,8 @@ static int computeKmeans(imagecore::ImageRGBA *frameImage, unsigned int numClust
 	uint8_t* buffer = frameImage->lockRect(width, height, framePitch);
 
 	// get all the samples (whose alpha value is > 128)
-	for( unsigned int y = 0; y < height; y++ ) {
-		for( unsigned int x = 0; x < width; x++ ) {
+	for( unsigned int y = 0; y < height; ++y ) {
+		for( unsigned int x = 0; x < width; ++x ) {
 			const RGBA rgba = *(RGBA*)(&buffer[y * framePitch + x * 4]);
 			if( rgba.a > 128 ) {
 				float3 lab = ColorSpace::srgbToLab(ColorSpace::byteToFloat(rgba));
@@ -380,12 +381,12 @@ static int computeKmeans(imagecore::ImageRGBA *frameImage, unsigned int numClust
 
 	vector<colorSample> centroids = initializeCentroids(numCluster, samples);
 	// main loop for k-means clustering
-	for( unsigned int iteration = 0; iteration < MAX_ITERATIONS; iteration++ ) {
+	for( unsigned int iteration = 0; iteration < MAX_ITERATIONS; ++iteration ) {
 		sampleLabeling(samples, centroids);
 		vector<colorSample> newCentroids = getCentroids(samples, numCluster);
 		//if newCentroids are closed enough to old centroids, stop iteration
 		bool closeEnough = true;
-		for( unsigned int k = 0; k < numCluster; k++ ) {
+		for( unsigned int k = 0; k < numCluster; ++k ) {
 			if( squaredDist(centroids[k], newCentroids[k]) > DELTA_LIMIT ) {
 				closeEnough = false;
 			}
@@ -401,7 +402,7 @@ static int computeKmeans(imagecore::ImageRGBA *frameImage, unsigned int numClust
 	unsigned int numOutColors = 0;
 	colorPalette[numOutColors] = centroids[numCluster-1].rgba;
 	colorPct[numOutColors] = (double)centroids[numCluster - 1].clusterSize / totalSize;
-	for( int k = numCluster - 2; k >= 0; k-- ) {
+	for( int k = numCluster - 2; k >= 0; --k ) {
 		double pct = (double)centroids[k].clusterSize / totalSize;
 		if( pct < 0.001f)  {
 			continue;
@@ -409,7 +410,7 @@ static int computeKmeans(imagecore::ImageRGBA *frameImage, unsigned int numClust
 		if( centroids[k].rgba == colorPalette[numOutColors] ) {
 			colorPct[numOutColors] += pct;
 		} else {
-			numOutColors++;
+			++numOutColors;
 			colorPalette[numOutColors] = centroids[k].rgba;
 			colorPct[numOutColors] = pct;
 		}
