@@ -80,10 +80,6 @@ auto mux(internal::demux::MP4& mp4_decoder, internal::decode::H264_BYTESTREAM& h
   THROW_IF(fps_factor <= 0, InvalidArguments);
   THROW_IF(!((width > 0 && height > 0) || (width == 0 && height == 0)), InvalidArguments);
 
-  vector<encode::Sample> audio_samples;
-  vector<encode::Sample> video_samples;
-  vector<common::EditBox> edit_boxes;
-
   // Get an ordered list of trimmed video pts (we assume H264 AnnexB has frames with ordered pts)
   vector<uint64_t> valid_pts;
   for (auto sample: mp4_decoder.video_track) {
@@ -99,9 +95,14 @@ auto mux(internal::demux::MP4& mp4_decoder, internal::decode::H264_BYTESTREAM& h
   const int64_t video_first_pts = valid_pts[0];
   const int64_t audio_pts_offset = video_first_pts * mp4_decoder.audio_track.settings().timescale / mp4_decoder.video_track.settings().timescale;
 
+  vector<encode::Sample> audio_samples;
+  vector<encode::Sample> video_samples;
+  video_samples.reserve(h264_bytestream_decoder.count());
+
   uint32_t video_sample_index = 0;
   uint32_t audio_sample_index = 0;
   int64_t audio_first_dts = -1;
+
   for (auto sample_func: h264_bytestream_decoder) {
     auto v_sample = raw_sample_convert(sample_func(), valid_pts[video_sample_index] - video_first_pts, valid_pts[video_sample_index] - video_first_pts);
     const float v_dts = (float)v_sample.dts / (mp4_decoder.video_track.settings().timescale);
@@ -127,10 +128,15 @@ auto mux(internal::demux::MP4& mp4_decoder, internal::decode::H264_BYTESTREAM& h
     video_samples.push_back(v_sample);
     video_sample_index += fps_factor;
   }
+
+  const auto audio_edit_boxes = mp4_decoder.audio_track.edit_boxes();
+  vector<common::EditBox> edit_boxes;
+  edit_boxes.reserve(audio_edit_boxes.size());
+
   // Since we remove edit boxes from video, we need to align audio edit boxes accordingly
   // Also if we removed any audio samples in the muxing process, we should reflect that here
   bool first_edit_box = true;
-  for (auto edit_box: mp4_decoder.audio_track.edit_boxes()) {
+  for (const auto& edit_box: audio_edit_boxes) {
     if (first_edit_box) {
       const int64_t start_pts = edit_box.start_pts + audio_pts_offset - audio_first_dts;
       const uint64_t duration_pts = edit_box.duration_pts - audio_pts_offset;
@@ -159,6 +165,9 @@ auto stitch(vector<function<common::Data32(void)>> movies, bool disable_audio) -
   vector<functional::Audio<decode::Sample>> audios;
   vector<functional::Video<decode::Sample>> videos;
   vector<vector<common::EditBox>> edit_boxes_per_track;
+  audios.reserve(movies.size());
+  videos.reserve(movies.size());
+  edit_boxes_per_track.reserve(movies.size());
   for (auto movie_data: movies) {
     auto mp4_decoder = internal::demux::MP4(move(movie_data()));
     audios.push_back((functional::Audio<decode::Sample>)mp4_decoder.audio_track);
