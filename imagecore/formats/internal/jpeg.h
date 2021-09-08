@@ -30,6 +30,8 @@
 #include "imagecore/formats/exif/exifreader.h"
 #include "imagecore/formats/exif/exifwriter.h"
 
+#define HAVE_BOOLEAN
+typedef int boolean;
 
 #include <setjmp.h>
 #include "jpeglib.h"
